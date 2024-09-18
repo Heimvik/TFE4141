@@ -30,3 +30,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+##WORKS, but:
+# - Add multithreading to and asynchronus pipeline to signify the workings of it
+# - Add status register, performance coutners and debug registers
+# - Add the stream of bytes integrated into the start of the pipeline, read in when empty space in pipeline

@@ -11,9 +11,10 @@ N = 25553    ## Modulus
 
 
 messages = {}
-stageDoingMessage = [0 for i in range(PIPELINE_STAGES+2)]
 
-cases = queue.Queue()
+pipelineLog = []
+pipelineLogMtx = threading.Lock()
+
 caseMtx = threading.Lock()
 
 '''
@@ -67,14 +68,11 @@ def reportResults():
         M = data[0]  # Original message
         pipelineResult = data[1]  # Result from the pipeline
         
-        # Compute the expected result using the built-in pow function
         expectedResult = pow(M, E, N)
         
-        # Print the results in table format
         mismatch = "Yes" if pipelineResult != expectedResult else "No"
         print(f"{messageID:<15} {pipelineResult:<20} {expectedResult:<20} {mismatch:<10}")
         
-        # Check if the results match
         if pipelineResult != expectedResult:
             print(f"Mismatch found for message ID {messageID}!")
             mismatch_found = True
@@ -84,29 +82,34 @@ def reportResults():
     else:
         print("\nThere were mismatches in the results.")
 
-
 def reportProgress():
-    print("\n--- Report Results ---\n")
+    # Prepare a dictionary to store data for each messageID
+    progression = {}
     
-    # Iterate through each stage and visualize the message IDs
-    for stageID in range(PIPELINE_STAGES + 2):
-        # Indent the stages progressively to create a "pipeline" shape
-        indent = " " * (stageID * 4)  # Increase indentation with each stage
-        
-        # Check if there's a message ID in stageDoingMessage for the current stage
-        message_id = stageDoingMessage[stageID]
-        if message_id != 0:  # Assuming 0 means no message is being processed
-            print(f"{indent}Stage {stageID}: Message ID {message_id}")
-        else:
-            print(f"{indent}Stage {stageID}: Empty")
+    for stageID, messageID, currentC, currentP in pipelineLog:
+        if messageID not in progression:
+            progression[messageID] = [''] * (PIPELINE_STAGES + 1) 
+        progression[messageID][stageID] = f"C: {currentC}, P: {currentP}" 
+    
+    # Print the header
+    print("\n--- Pipeline Progression ---")
+    header = "Message ID | " + " ".join(f"Stage {i if i else ' ':<16}" for i in range(PIPELINE_STAGES + 1))
+    print(header)
+    print("-" * len(header))
 
-    print("\n--- End of Pipeline Results ---\n")
+    # Print each messageID's progression
+    for messageID in sorted(progression.keys()):
+        row = f"{messageID:<11} | " + " | ".join(f"{value if value else ' ':<20}" for value in progression[messageID])
+        print(row)
+    
+    print("-" * len(header))
+
 
 def getQueueElement(q):
     if not q.empty():
         return q.queue[0]  # Access the first element
     else:
-        return "Empty"  # Return 'Empty' if the queue is empty
+        return ""  # Return 'Empty' if the queue is empty
 
 
 def blakelyMulMod(a, b, n):
@@ -143,7 +146,6 @@ def blakeleyPipelineStart(stageID):
         pipelineIntermediates[stageID][0].put(1)
         pipelineIntermediates[stageID][1].put(nextCase[0])
         pipelineIntermediates[stageID][2].put(nextCase[1])
-        stageDoingMessage[stageID] = getQueueElement(pipelineIntermediates[stageID][2])
         intermediateMtx[stageID].release()
 
         ## Signal to next stage that data is ready
@@ -159,11 +161,14 @@ def blakeleyPipelineStage(eSlice,n,stageID):
         currentC = pipelineIntermediates[stageID-1][0].get(0)
         currentP = pipelineIntermediates[stageID-1][1].get(0)
         currentID = pipelineIntermediates[stageID-1][2].get()
-        stageDoingMessage[stageID] = getQueueElement(pipelineIntermediates[stageID][2])
         intermediateMtx[stageID-1].release()
 
         ## Signal to previous stage it has popped, such that the previous stage can replace its values
         intermediatesPopped[stageID-1].release()
+
+        pipelineLogMtx.acquire()
+        pipelineLog.append([stageID,currentID, currentC, currentP])
+        pipelineLogMtx.release()
 
         ## Accumulate new values
         if KEY_LENGTH % PIPELINE_STAGES != 0:
@@ -204,7 +209,6 @@ def blakeleyPipelineEnd(stageID):
         endC = pipelineIntermediates[stageID-1][0].get(0)
         endP = pipelineIntermediates[stageID-1][1].get(0)
         messageID = pipelineIntermediates[stageID-1][2].get(0)
-        stageDoingMessage[stageID] = getQueueElement(pipelineIntermediates[stageID][2])
         intermediateMtx[stageID-1].release()
 
         messages[messageID].append(endC)    ## For final reults
@@ -212,20 +216,20 @@ def blakeleyPipelineEnd(stageID):
         ## Signal to previous stage it has popped, such that the previous stage can put if it lies ahead in time
         intermediatesPopped[stageID-1].release()
 
-        if(messageID == (cases.qsize()-1)):
+        if(messageID == (numCases-1)):
             print("Last case out of the pipeline, signaled controller.")
             pipelineFinished.release()
 
 def blakeleyPipelineController():
     while(True):
         requestNewCase.acquire()
-        reportProgress()
         caseMtx.acquire()
         if cases.qsize() == 0:
-            print("Finished, no more cases left. Generating report.")
-            time.sleep(1)
+            print("Finished, no more cases left. Awaiting signal from last pipeline stage.")
             pipelineFinished.acquire()
+            reportProgress()
             reportResults()
+            ## Timing test does not make sence in software, as the gains from the pipelining is only existent in HW
         caseMtx.release()
         grantNewCase.release()
 
@@ -234,6 +238,8 @@ def paralellBinartExp():
     ## Load all test cases that simulate the stream of M
     global cases
     cases = getCases("testCases.csv")
+    global numCases
+    numCases = cases.qsize()
 
     eSlices = splitE(E, KEY_LENGTH, PIPELINE_STAGES)
     ## Start all threads and asynchromus communication (semaphores)

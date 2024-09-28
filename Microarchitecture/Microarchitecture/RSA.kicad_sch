@@ -1,0 +1,96 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "b37bab1d-0d37-4686-b894-9b4a217fcdb3")
+	(paper "A4")
+	(lib_symbols)
+	(sheet
+		(at 60.96 73.66)
+		(size 33.02 17.78)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "d24df161-92da-4d3c-8ec4-b2b340dd12b4")
+		(property "Sheetname" "RSA_STAGE_MODULE"
+			(at 60.96 72.9484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "STAGE.kicad_sch"
+			(at 60.96 92.0246 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "ES" input
+			(at 82.55 73.66 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "89dbb2c2-b230-4c4d-9ec9-2721ae480aa9")
+		)
+		(pin "IL" input
+			(at 93.98 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "69a92316-adfb-49e0-bf36-927076fb985e")
+		)
+		(pin "IP" output
+			(at 60.96 87.63 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "88313c50-2ebc-49b7-8334-792e1d32c829")
+		)
+		(pin "IO" output
+			(at 93.98 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "9fa800e0-8dee-435c-87ad-60cc5059fb87")
+		)
+		(pin "II" input
+			(at 60.96 81.28 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "bed9b5c9-47a4-4be6-b05a-c996df5533d3")
+		)
+		(instances
+			(project "Microarchitecture"
+				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c/21c2d8ae-34c8-4eeb-a025-0344b2d7e18d"
+					(page "4")
+				)
+			)
+		)
+	)
+)

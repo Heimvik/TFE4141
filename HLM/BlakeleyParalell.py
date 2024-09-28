@@ -33,6 +33,8 @@ grantNewCase = threading.Semaphore(0)
 
 pipelineFinished = threading.Semaphore(0)
 
+## Note that all semaphore signals correspond to interstage/intercontroller commnication in HW
+
 
 def getCases(filename):
     with open(filename, mode='r') as file:
@@ -93,13 +95,13 @@ def reportProgress():
     
     # Print the header
     print("\n--- Pipeline Progression ---")
-    header = "Message ID | " + " ".join(f"Stage {i if i else ' ':<16}" for i in range(PIPELINE_STAGES + 1))
+    header = "Message ID | " + " ".join(f"Stage {i if i else ' ':<14}" for i in range(PIPELINE_STAGES + 1))
     print(header)
     print("-" * len(header))
 
     # Print each messageID's progression
     for messageID in sorted(progression.keys()):
-        row = f"{messageID:<11} | " + " | ".join(f"{value if value else ' ':<20}" for value in progression[messageID])
+        row = f"{messageID:<11} | " + " | ".join(f"{value if value else ' ':<18}" for value in progression[messageID])
         print(row)
     
     print("-" * len(header))

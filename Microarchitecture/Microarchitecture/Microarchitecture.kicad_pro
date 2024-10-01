@@ -406,6 +406,14 @@
     [
       "3cf92153-a427-4dcb-8742-7323161aa0ab",
       "BLAKELEY_MODULE1"
+    ],
+    [
+      "13dcc967-34b6-4992-aa6e-12cd2f23cead",
+      "AXI_TRANSMIT_MODULE"
+    ],
+    [
+      "2a3bc4e3-7612-4120-a955-4baebcb77498",
+      "AXI_RECEIVE_MODULE"
     ]
   ],
   "text_variables": {}

@@ -5,10 +5,109 @@
 	(uuid "b37bab1d-0d37-4686-b894-9b4a217fcdb3")
 	(paper "A4")
 	(lib_symbols)
+	(rectangle
+		(start 76.2 50.8)
+		(end 215.9 114.3)
+		(stroke
+			(width 0.254)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(uuid e1b4fa56-daa1-4554-b2d5-791065d61b5e)
+	)
+	(text "rsa_core"
+		(exclude_from_sim no)
+		(at 147.32 56.896 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(thickness 0.508)
+				(bold yes)
+			)
+		)
+		(uuid "10fd7ce5-9062-4311-a21b-71edaeb8cc7f")
+	)
 	(sheet
-		(at 60.96 73.66)
-		(size 33.02 17.78)
+		(at 177.8 63.5)
+		(size 25.4 44.45)
 		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "13dcc967-34b6-4992-aa6e-12cd2f23cead")
+		(property "Sheetname" "AXI_TRANSMIT_MODULE"
+			(at 177.8 62.7884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "AXI_TRANSMIT.kicad_sch"
+			(at 177.8 108.5346 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Microarchitecture"
+				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c/21c2d8ae-34c8-4eeb-a025-0344b2d7e18d"
+					(page "7")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 88.9 63.5)
+		(size 25.4 44.45)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "2a3bc4e3-7612-4120-a955-4baebcb77498")
+		(property "Sheetname" "AXI_RECEIVE_MODULE"
+			(at 88.9 62.7884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "AXI_RECEIVE.kicad_sch"
+			(at 88.9 108.5346 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Microarchitecture"
+				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c/21c2d8ae-34c8-4eeb-a025-0344b2d7e18d"
+					(page "8")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 129.54 76.2)
+		(size 33.02 17.78)
 		(stroke
 			(width 0.1524)
 			(type solid)
@@ -18,7 +117,7 @@
 		)
 		(uuid "d24df161-92da-4d3c-8ec4-b2b340dd12b4")
 		(property "Sheetname" "RSA_STAGE_MODULE"
-			(at 60.96 72.9484 0)
+			(at 136.652 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -27,7 +126,7 @@
 			)
 		)
 		(property "Sheetfile" "STAGE.kicad_sch"
-			(at 60.96 92.0246 0)
+			(at 129.54 94.5646 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -36,7 +135,7 @@
 			)
 		)
 		(pin "ES" input
-			(at 82.55 73.66 90)
+			(at 149.86 76.2 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -45,45 +144,95 @@
 			)
 			(uuid "89dbb2c2-b230-4c4d-9ec9-2721ae480aa9")
 		)
-		(pin "IL" input
-			(at 93.98 87.63 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-			(uuid "69a92316-adfb-49e0-bf36-927076fb985e")
-		)
-		(pin "IP" output
-			(at 60.96 87.63 180)
+		(pin "IPO" output
+			(at 129.54 91.44 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
-			(uuid "88313c50-2ebc-49b7-8334-792e1d32c829")
+			(uuid "ccb7f94a-a7c8-4b80-92be-39cee51f7931")
 		)
-		(pin "IO" output
-			(at 93.98 81.28 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-			(uuid "9fa800e0-8dee-435c-87ad-60cc5059fb87")
-		)
-		(pin "II" input
-			(at 60.96 81.28 180)
+		(pin "DCI" input
+			(at 129.54 83.82 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
-			(uuid "bed9b5c9-47a4-4be6-b05a-c996df5533d3")
+			(uuid "8721af86-25fc-45a9-9974-6809db66594f")
+		)
+		(pin "ILI" input
+			(at 129.54 88.9 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "2501d509-dc78-4225-9ba8-588b29df1780")
+		)
+		(pin "DPI" input
+			(at 129.54 81.28 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "159762dd-800b-461e-8f24-3ecd7ec77e54")
+		)
+		(pin "N" input
+			(at 142.24 76.2 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "b8094e76-84bb-41e0-bab0-95c6f23dfdf3")
+		)
+		(pin "ILO" output
+			(at 162.56 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "276cc05f-1df1-41bf-9328-cb1a348dcf4c")
+		)
+		(pin "DCO" output
+			(at 162.56 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "68228d2d-85a9-481d-aa03-4ee87511e883")
+		)
+		(pin "IPI" input
+			(at 162.56 91.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "13db05ac-f4a6-4030-b4b8-5e7de06fb9b9")
+		)
+		(pin "DPO" output
+			(at 162.56 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "9eeaa375-31c0-4415-8f20-2943dbad0401")
 		)
 		(instances
 			(project "Microarchitecture"

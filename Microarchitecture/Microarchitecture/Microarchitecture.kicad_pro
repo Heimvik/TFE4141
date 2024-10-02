@@ -414,6 +414,30 @@
     [
       "2a3bc4e3-7612-4120-a955-4baebcb77498",
       "AXI_RECEIVE_MODULE"
+    ],
+    [
+      "5c7540d9-7028-48a5-955b-0e835a2154cd",
+      "RSA_STAGE_MODULE1"
+    ],
+    [
+      "3cf92153-a427-4dcb-8742-7323161aa0ab",
+      "BLAKELEY_MODULE1"
+    ],
+    [
+      "c62d5034-424e-4315-a86f-3b8907c5716e",
+      "BLAKELEY_MODULE2"
+    ],
+    [
+      "2ff9fb5f-e895-4ed8-9926-01fc2395a11b",
+      "RSA_STAGE_MODULE2"
+    ],
+    [
+      "3cf92153-a427-4dcb-8742-7323161aa0ab",
+      "BLAKELEY_MODULE1"
+    ],
+    [
+      "c62d5034-424e-4315-a86f-3b8907c5716e",
+      "BLAKELEY_MODULE2"
     ]
   ],
   "text_variables": {}

@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.16" pages="2">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17" pages="2">
   <diagram id="u1lkG1_b83hIFHSMNddz" name="RSA_STAGE_MODULE">
-    <mxGraphModel dx="2165" dy="1033" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1039" dy="496" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -217,7 +217,7 @@
         <mxCell id="0a0sdnhjyuBk6eyRKKiC-15" value="IF IPI == 1 &amp;amp;&amp;amp; CLK == RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="463.47" y="1090" width="157" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="DHezMg4_WYtDDS3jV1EO-1" value="IF CLK = RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="DHezMg4_WYtDDS3jV1EO-1" value="IF CLK = RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="622.97" y="429" width="86" height="26" as="geometry" />
         </mxCell>
       </root>
@@ -228,7 +228,7 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="ly1w00UDoldr-nD69EHB-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="WRu4B7tDvR91l4tycOVn-2" target="WRu4B7tDvR91l4tycOVn-64">
+        <mxCell id="ly1w00UDoldr-nD69EHB-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="WRu4B7tDvR91l4tycOVn-2" target="WRu4B7tDvR91l4tycOVn-64" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="WRu4B7tDvR91l4tycOVn-2" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -288,16 +288,16 @@
         <mxCell id="WRu4B7tDvR91l4tycOVn-43" value="SAVE_SUM" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="105" y="288" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="WRu4B7tDvR91l4tycOVn-46" value="ABVAL = 1 &amp;amp;&amp;amp;&lt;br&gt;CLK == RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="-250" y="285" width="100" height="40" as="geometry" />
+        <mxCell id="WRu4B7tDvR91l4tycOVn-46" value="ABVAL = 1 &amp;amp;&amp;amp;&lt;br&gt;&lt;font color=&quot;#ff8000&quot;&gt;CLK == RE&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="-247" y="285" width="95" height="41" as="geometry" />
         </mxCell>
-        <mxCell id="WRu4B7tDvR91l4tycOVn-47" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;IF SUM&amp;gt;N &amp;amp;&amp;amp; CLK == RE&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="WRu4B7tDvR91l4tycOVn-47" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;IF SUM&amp;gt;N &amp;amp;&amp;amp; &lt;/span&gt;&lt;span style=&quot;font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;&lt;font color=&quot;#ff8000&quot;&gt;CLK == RE&lt;/font&gt;&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="212.5" y="280" width="70" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="WRu4B7tDvR91l4tycOVn-53" value="CLK == RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="255" y="325" width="80" height="30" as="geometry" />
+        <mxCell id="WRu4B7tDvR91l4tycOVn-53" value="&lt;font color=&quot;#ff8000&quot;&gt;CLK == RE&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="256" y="327" width="79" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="WRu4B7tDvR91l4tycOVn-54" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;IF SUM&amp;lt;N &amp;amp;&amp;amp; CLK == RE&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="WRu4B7tDvR91l4tycOVn-54" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;IF SUM&amp;lt;N &amp;amp;&amp;amp; &lt;/span&gt;&lt;span style=&quot;font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: nowrap; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;&lt;font color=&quot;#ff8000&quot;&gt;CLK == RE&lt;/font&gt;&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="173" y="399" width="145" height="30" as="geometry" />
         </mxCell>
         <mxCell id="WRu4B7tDvR91l4tycOVn-59" value="IF ADEC&amp;nbsp; != 0xFF &amp;amp;&amp;amp; CLK == RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
@@ -318,10 +318,10 @@
         <mxCell id="WRu4B7tDvR91l4tycOVn-66" value="SETUP_SAVE_SUM" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="-120" y="274.5" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="WRu4B7tDvR91l4tycOVn-70" value="CLK == RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="-19" y="292" width="79" height="26" as="geometry" />
+        <mxCell id="WRu4B7tDvR91l4tycOVn-70" value="&lt;font color=&quot;#ff8000&quot;&gt;CLK == RE&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="-21" y="299" width="79" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="WRu4B7tDvR91l4tycOVn-71" value="&lt;br&gt;NOTE:&lt;br&gt;The proposed timing between the transitions is pessimistic. Improvements using FE several places and skipping seperate stage for setting SUMDMUX_C0 might be possible." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+        <mxCell id="WRu4B7tDvR91l4tycOVn-71" value="&lt;br&gt;NOTE:&lt;br&gt;The proposed timing between the transitions is pessimistic. Improvements using RE and FE all places marked in orange is expected ot work as well." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="240" y="682" width="240" height="30" as="geometry" />
         </mxCell>
         <mxCell id="WRu4B7tDvR91l4tycOVn-73" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;exitX=0.25;exitY=0;exitDx=0;exitDy=0;" parent="1" source="WRu4B7tDvR91l4tycOVn-16" target="WRu4B7tDvR91l4tycOVn-41" edge="1">
@@ -336,16 +336,16 @@
         <mxCell id="WRu4B7tDvR91l4tycOVn-72" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="140" y="451" width="110" height="79" as="geometry" />
         </mxCell>
-        <mxCell id="WRu4B7tDvR91l4tycOVn-75" value="IF CLK == RE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="165" y="570" width="100" height="30" as="geometry" />
+        <mxCell id="WRu4B7tDvR91l4tycOVn-75" value="&lt;font color=&quot;#ff8000&quot;&gt;CLK == RE&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="176" y="572" width="79" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="ly1w00UDoldr-nD69EHB-4" value="&lt;span style=&quot;text-align: left;&quot;&gt;RREG_RST = 0&lt;br&gt;&lt;/span&gt;RREG_CLK = 0&lt;div&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;text-align: left;&quot;&gt;SUMREG_CLK = 0&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;span style=&quot;text-align: left;&quot;&gt;SUMDMUX_C0 = 0&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="ly1w00UDoldr-nD69EHB-4" value="&lt;span style=&quot;text-align: left;&quot;&gt;RREG_RST = 0&lt;br&gt;&lt;/span&gt;RREG_CLK = 0&lt;div&gt;&lt;div style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;text-align: left;&quot;&gt;SUMREG_CLK = 0&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;span style=&quot;text-align: left;&quot;&gt;SUMDMUX_C0 = 0&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="133" y="466" width="122" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="ly1w00UDoldr-nD69EHB-5" value="SETUP_SAVE_R" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="ly1w00UDoldr-nD69EHB-5" value="SETUP_SAVE_R" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="140" y="451" width="111" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="ly1w00UDoldr-nD69EHB-6" value="&lt;div&gt;ADEC_CLK = 0&lt;br&gt;SUMREG_CLK = 1&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="ly1w00UDoldr-nD69EHB-6" value="&lt;div&gt;ADEC_CLK = 0&lt;br&gt;SUMREG_CLK = 1&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="66.5" y="319.5" width="121" height="41" as="geometry" />
         </mxCell>
       </root>

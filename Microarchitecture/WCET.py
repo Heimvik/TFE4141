@@ -1,11 +1,10 @@
 import math
 
-F_CLK = 150 * 10**6
+F_CLK = 200 * 1e6
 
 def CYC_BLAKELEY_MODULE(w):
-    MAXCYCLES_ONE_A_BIT = 9
-    MINCYCLES_ONE_A_BIT = 6
-    return MINCYCLES_ONE_A_BIT*w
+    MAXCYCLES_ONE_A_BIT = 1
+    return MAXCYCLES_ONE_A_BIT*w
 
 def CYC_RSA_STAGE_MODULE(w):
     START = 2
@@ -13,7 +12,10 @@ def CYC_RSA_STAGE_MODULE(w):
     END = 1
     return w*CYC_BLAKELEY_MODULE(w)+(START+SMCP+END)
 
-def findRsaMs(cycles):
-    return (cycles/F_CLK)*10**3
+def CYC_RSA_CORE_PIPELINED(w,stages):
+    return CYC_RSA_STAGE_MODULE(w)/stages
 
-print(findRsaMs(CYC_RSA_STAGE_MODULE(256)))
+def findTestEstimate():
+    return f"{round(5000*(CYC_RSA_CORE_PIPELINED(256,4)/F_CLK)*1e3,2)} ms"
+
+print(findTestEstimate())

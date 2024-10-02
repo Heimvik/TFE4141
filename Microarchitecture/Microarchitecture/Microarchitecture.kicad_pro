@@ -400,11 +400,11 @@
       "RSA_STAGE_MODULE"
     ],
     [
-      "c62d5034-424e-4315-a86f-3b8907c5716e",
-      "BLAKELEY_MODULE2"
+      "ad025e36-342f-446b-9268-b4da1d9623a9",
+      "BLAKELEY_MODULE_REV3"
     ],
     [
-      "3cf92153-a427-4dcb-8742-7323161aa0ab",
+      "49cf7aed-c9dc-43e0-9dd4-664fc1390d76",
       "BLAKELEY_MODULE1"
     ],
     [
@@ -420,24 +420,36 @@
       "RSA_STAGE_MODULE1"
     ],
     [
-      "3cf92153-a427-4dcb-8742-7323161aa0ab",
+      "49cf7aed-c9dc-43e0-9dd4-664fc1390d76",
       "BLAKELEY_MODULE1"
     ],
     [
-      "c62d5034-424e-4315-a86f-3b8907c5716e",
-      "BLAKELEY_MODULE2"
+      "ad025e36-342f-446b-9268-b4da1d9623a9",
+      "BLAKELEY_MODULE_REV3"
     ],
     [
       "2ff9fb5f-e895-4ed8-9926-01fc2395a11b",
       "RSA_STAGE_MODULE2"
     ],
     [
-      "3cf92153-a427-4dcb-8742-7323161aa0ab",
+      "49cf7aed-c9dc-43e0-9dd4-664fc1390d76",
       "BLAKELEY_MODULE1"
     ],
     [
-      "c62d5034-424e-4315-a86f-3b8907c5716e",
-      "BLAKELEY_MODULE2"
+      "ad025e36-342f-446b-9268-b4da1d9623a9",
+      "BLAKELEY_MODULE_REV3"
+    ],
+    [
+      "74ab4954-1e97-4242-bf78-d915d78f9b4b",
+      "BLAKELEY_MODULE_REV2"
+    ],
+    [
+      "74ab4954-1e97-4242-bf78-d915d78f9b4b",
+      "BLAKELEY_MODULE_REV2"
+    ],
+    [
+      "74ab4954-1e97-4242-bf78-d915d78f9b4b",
+      "BLAKELEY_MODULE_REV2"
     ]
   ],
   "text_variables": {}

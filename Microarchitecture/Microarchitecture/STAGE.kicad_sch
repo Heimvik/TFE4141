@@ -3103,8 +3103,8 @@
 		)
 	)
 	(image
-		(at 99.06 242.57)
-		(scale 0.211169)
+		(at 143.51 241.3)
+		(scale 0.58991)
 		(uuid "52afcbd1-b84e-4712-98ea-663a19e46326")
 		(data "iVBORw0KGgoAAAANSUhEUgAACVEAAAK8CAYAAADsh23GAAAAAXNSR0IArs4c6QAAAARnQU1BAACx"
 			"jwv8YQUAAAAJcEhZcwAAFiUAABYlAUlSJPAAAP+lSURBVHhe7P0PbFT3ne//v20mLNT1jrG/tKak"
@@ -4840,6 +4840,16 @@
 		)
 		(uuid "3f2a080c-6bd5-49b6-bf8d-69caeed3b8b6")
 	)
+	(text "Old rev 1 BLAKELEY_MODULE ->"
+		(exclude_from_sim no)
+		(at 39.624 28.194 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "5dc4c34a-6db0-455f-bf51-3f9cc9b751f1")
+	)
 	(text "From rsa_regio"
 		(exclude_from_sim no)
 		(at 287.528 39.878 0)
@@ -5609,7 +5619,7 @@
 		)
 	)
 	(sheet
-		(at 303.53 90.17)
+		(at 57.15 16.51)
 		(size 31.75 24.13)
 		(fields_autoplaced yes)
 		(stroke
@@ -5619,9 +5629,9 @@
 		(fill
 			(color 0 0 0 0.0000)
 		)
-		(uuid "3cf92153-a427-4dcb-8742-7323161aa0ab")
+		(uuid "49cf7aed-c9dc-43e0-9dd4-664fc1390d76")
 		(property "Sheetname" "BLAKELEY_MODULE1"
-			(at 303.53 89.4584 0)
+			(at 57.15 15.7984 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5630,7 +5640,7 @@
 			)
 		)
 		(property "Sheetfile" "Blakeley.kicad_sch"
-			(at 303.53 114.8846 0)
+			(at 57.15 41.2246 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5639,64 +5649,64 @@
 			)
 		)
 		(pin "N" input
-			(at 335.28 107.95 0)
+			(at 88.9 34.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
 			)
-			(uuid "c6e08dce-66c7-48d0-9a47-fbf49bda4a13")
+			(uuid "4660bf2b-4b8a-45a5-bff6-b398917f26df")
 		)
 		(pin "B" input
-			(at 303.53 107.95 180)
+			(at 57.15 34.29 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
-			(uuid "6e2ff1db-dee5-47cb-8d37-98f19b03c55e")
+			(uuid "59a63a12-b356-4583-b8be-170ea18abc4c")
 		)
 		(pin "A" input
-			(at 303.53 95.25 180)
+			(at 57.15 21.59 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
-			(uuid "02e9cafd-4924-42cc-a9b9-e783279890d5")
+			(uuid "513be06b-6fba-4eef-8230-9eb265083aef")
 		)
 		(pin "R" output
-			(at 335.28 95.25 0)
+			(at 88.9 21.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
 			)
-			(uuid "975d5662-6393-458e-968e-d2f26f3191ce")
+			(uuid "1dacae22-711c-4caa-a4eb-615c53b7a64f")
 		)
 		(pin "RVAL" output
-			(at 335.28 97.79 0)
+			(at 88.9 24.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
 			)
-			(uuid "d7efc6b3-57eb-4f58-ae77-353488c14de6")
+			(uuid "89bac923-e335-4ef8-a304-836f35af1619")
 		)
 		(pin "ABVAL" input
-			(at 303.53 101.6 180)
+			(at 57.15 27.94 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
-			(uuid "4c20ef96-328b-4a2e-80d2-343915b61d31")
+			(uuid "cd3ff0b1-b21c-41b3-83e6-8398c2d0bd2d")
 		)
 		(instances
 			(project "Microarchitecture"
@@ -5713,6 +5723,104 @@
 		)
 	)
 	(sheet
+		(at 303.53 90.17)
+		(size 31.75 24.13)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "74ab4954-1e97-4242-bf78-d915d78f9b4b")
+		(property "Sheetname" "BLAKELEY_MODULE_REV2"
+			(at 303.53 89.4584 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "blakeley_rev2.kicad_sch"
+			(at 303.53 114.8846 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "A" input
+			(at 303.53 95.25 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "deb2db01-8dfd-4ea8-a1be-e1b0e7eff2ad")
+		)
+		(pin "B" input
+			(at 303.53 107.95 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "f5c07e7e-55f3-40b4-a5ef-ece580d6390f")
+		)
+		(pin "ABVAL" input
+			(at 303.53 101.6 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+			(uuid "da24d2eb-7fa8-46a1-b41c-34f9b678d750")
+		)
+		(pin "N" input
+			(at 335.28 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "78a0273f-1271-42f4-a05e-9a40125eb289")
+		)
+		(pin "R" output
+			(at 335.28 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "d72aff05-e1ee-4b0b-b8d7-389715b2422e")
+		)
+		(pin "RVAL" output
+			(at 335.28 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "8c7fe74a-ff15-4b4c-a580-76996876018a")
+		)
+		(instances
+			(project "Microarchitecture"
+				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c/21c2d8ae-34c8-4eeb-a025-0344b2d7e18d/d24df161-92da-4d3c-8ec4-b2b340dd12b4"
+					(page "15")
+				)
+			)
+		)
+	)
+	(sheet
 		(at 303.53 176.53)
 		(size 31.75 24.13)
 		(fields_autoplaced yes)
@@ -5723,8 +5831,8 @@
 		(fill
 			(color 0 0 0 0.0000)
 		)
-		(uuid "c62d5034-424e-4315-a86f-3b8907c5716e")
-		(property "Sheetname" "BLAKELEY_MODULE2"
+		(uuid "ad025e36-342f-446b-9268-b4da1d9623a9")
+		(property "Sheetname" "BLAKELEY_MODULE_REV3"
 			(at 303.53 175.8184 0)
 			(effects
 				(font
@@ -5733,7 +5841,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Sheetfile" "Blakeley.kicad_sch"
+		(property "Sheetfile" "blakeley_rev2.kicad_sch"
 			(at 303.53 201.2446 0)
 			(effects
 				(font
@@ -5741,26 +5849,6 @@
 				)
 				(justify left top)
 			)
-		)
-		(pin "N" input
-			(at 335.28 194.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-			(uuid "3cbe57ad-5b01-4387-b151-3852fc6016a7")
-		)
-		(pin "B" input
-			(at 303.53 194.31 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-			(uuid "39183333-89a7-41d7-9e2d-98d1dc916c70")
 		)
 		(pin "A" input
 			(at 303.53 181.61 180)
@@ -5770,27 +5858,17 @@
 				)
 				(justify left)
 			)
-			(uuid "4459a3de-e031-4495-8022-0f61fd12c567")
+			(uuid "9fed0b7c-5a66-44d1-aff3-6dbcb3a83aef")
 		)
-		(pin "R" output
-			(at 335.28 181.61 0)
+		(pin "B" input
+			(at 303.53 194.31 180)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 			)
-			(uuid "e5f20d05-70e2-4965-92e5-3fbc181c6f90")
-		)
-		(pin "RVAL" output
-			(at 335.28 184.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-			(uuid "4aa757aa-d548-455d-baf6-94da065bc114")
+			(uuid "d2c9fc5d-a56f-4678-ae8a-d3d7f811e557")
 		)
 		(pin "ABVAL" input
 			(at 303.53 187.96 180)
@@ -5800,7 +5878,37 @@
 				)
 				(justify left)
 			)
-			(uuid "69a874b9-152c-484a-808f-74e73de3f46e")
+			(uuid "f6ca9727-24ad-480c-a97b-2c6430402cfe")
+		)
+		(pin "N" input
+			(at 335.28 194.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "4af5fb8f-e7db-4224-9160-b2f480e392e5")
+		)
+		(pin "R" output
+			(at 335.28 181.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "0f8009cf-a35a-4938-8f68-56baeb2b3a92")
+		)
+		(pin "RVAL" output
+			(at 335.28 184.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "9bb0e3aa-8a7d-4901-8ca8-a0481e8ccb7f")
 		)
 		(instances
 			(project "Microarchitecture"

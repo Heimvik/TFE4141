@@ -4104,6 +4104,16 @@
 		)
 		(uuid "cbbabfa4-7414-4a7c-a3ad-4b7d9dc29abc")
 	)
+	(text "Reg here? ->"
+		(exclude_from_sim no)
+		(at 217.424 133.35 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "d2fb4dc6-2ba3-4265-93f7-d8a296b9796f")
+	)
 	(text "NB: NOTE1"
 		(exclude_from_sim no)
 		(at 216.154 107.696 0)
@@ -4373,7 +4383,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1f9cf4a7-30bf-4ae6-84b6-a02fa60c0218")
-		(property "Reference" "SUB10"
+		(property "Reference" "SUB12"
 			(at 254 183.642 0)
 			(effects
 				(font
@@ -4463,7 +4473,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "2d2e5214-fac8-40e3-a6d8-c1b62765891d")
-		(property "Reference" "AND5"
+		(property "Reference" "AND12"
 			(at 349.25 77.47 90)
 			(effects
 				(font
@@ -4533,7 +4543,6 @@
 		)
 	)
 	(symbol
-		(lib_name "Symbols:REG")
 		(lib_id "Symbols:REG")
 		(at 320.04 90.17 180)
 		(unit 1)
@@ -4542,7 +4551,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "34c2df34-42e1-4a50-877c-857edd157592")
-		(property "Reference" "REG25"
+		(property "Reference" "REG31"
 			(at 314.96 88.9 0)
 			(effects
 				(font
@@ -4627,7 +4636,6 @@
 		)
 	)
 	(symbol
-		(lib_name "Symbols:AND3")
 		(lib_id "Symbols:AND3")
 		(at 241.3 102.87 0)
 		(unit 1)
@@ -4636,7 +4644,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "47010268-34f2-4f86-894e-6716f0499574")
-		(property "Reference" "3ANDW3"
+		(property "Reference" "3ANDW5"
 			(at 238.252 103.124 0)
 			(effects
 				(font
@@ -4733,7 +4741,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "60a28297-e93d-496b-895b-8a28c98131aa")
-		(property "Reference" "SUB1"
+		(property "Reference" "SUB8"
 			(at 254 168.402 0)
 			(effects
 				(font
@@ -4803,7 +4811,6 @@
 		)
 	)
 	(symbol
-		(lib_name "Symbols:ADD")
 		(lib_id "Symbols:ADD")
 		(at 251.46 123.19 0)
 		(mirror y)
@@ -4813,7 +4820,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6d10c408-f081-4971-ae6d-1d6ec26e0e21")
-		(property "Reference" "ADD13"
+		(property "Reference" "ADD17"
 			(at 254.762 127.254 0)
 			(effects
 				(font
@@ -4904,7 +4911,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6ef30153-e7e5-4487-9fa9-c0c62d65a1dc")
-		(property "Reference" "MUX3"
+		(property "Reference" "MUX11"
 			(at 313.69 149.098 0)
 			(effects
 				(font
@@ -4983,7 +4990,6 @@
 		)
 	)
 	(symbol
-		(lib_name "Symbols:AND3")
 		(lib_id "Symbols:AND3")
 		(at 260.35 102.87 0)
 		(unit 1)
@@ -4992,7 +4998,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "80ad1df1-2e0e-4645-bd54-e25e4c109608")
-		(property "Reference" "3AND1"
+		(property "Reference" "3AND14"
 			(at 257.302 103.124 0)
 			(effects
 				(font
@@ -5089,7 +5095,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8ca5a81c-0ee8-4880-977c-448029ead907")
-		(property "Reference" "REG5"
+		(property "Reference" "REG29"
 			(at 177.038 97.536 0)
 			(effects
 				(font
@@ -5182,7 +5188,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "b3e74876-b18f-4c42-bdfe-44195d103826")
-		(property "Reference" "DECODE1"
+		(property "Reference" "DECODE7"
 			(at 216.662 80.01 0)
 			(effects
 				(font
@@ -5270,7 +5276,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cd78a72f-c69b-4cfb-abe6-9d31f08c882f")
-		(property "Reference" "AND4"
+		(property "Reference" "AND11"
 			(at 132.334 86.106 90)
 			(effects
 				(font
@@ -5348,7 +5354,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e6e3cde6-39fb-43c2-96c6-a1a4ed14bf74")
-		(property "Reference" "CMP4"
+		(property "Reference" "CMP6"
 			(at 242.062 189.23 0)
 			(effects
 				(font
@@ -5428,7 +5434,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f1b07ed4-7696-44db-aa7c-0906529418ff")
-		(property "Reference" "ADD12"
+		(property "Reference" "ADD16"
 			(at 174.244 110.998 0)
 			(effects
 				(font
@@ -5519,7 +5525,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f79b4117-d501-4db4-a8d1-ca733a92ad7f")
-		(property "Reference" "SHIFT7"
+		(property "Reference" "SHIFT9"
 			(at 312.42 129.794 0)
 			(effects
 				(font
@@ -5598,7 +5604,6 @@
 		)
 	)
 	(symbol
-		(lib_name "Symbols:AND3")
 		(lib_id "Symbols:AND3")
 		(at 271.78 102.87 0)
 		(unit 1)
@@ -5607,7 +5612,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "fd50bc21-554a-47ff-8e73-8ddc328a2c8b")
-		(property "Reference" "3AND11"
+		(property "Reference" "3AND15"
 			(at 269.24 103.632 0)
 			(effects
 				(font

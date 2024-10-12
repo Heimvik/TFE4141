@@ -4212,7 +4212,7 @@
 		)
 		(uuid "c8fd3254-a0bf-4716-b73f-dc4acf56885d")
 	)
-	(label "ADEC_RST"
+	(label "AINC_RST"
 		(at 119.38 96.52 180)
 		(fields_autoplaced yes)
 		(effects
@@ -4223,7 +4223,7 @@
 		)
 		(uuid "ce8ba6ef-c4d3-4aae-be33-ff67b90723bc")
 	)
-	(label "ADEC"
+	(label "AINC"
 		(at 119.38 80.01 180)
 		(fields_autoplaced yes)
 		(effects
@@ -4245,7 +4245,7 @@
 		)
 		(uuid "e3275dbf-227a-4b82-80e4-811df17491c2")
 	)
-	(label "ADEC_CLK"
+	(label "AINC_CLK"
 		(at 119.38 86.36 180)
 		(fields_autoplaced yes)
 		(effects

@@ -4096,6 +4096,16 @@
 		)
 		(uuid "6f53b5a8-77f0-45c3-b990-004ebec09bb5")
 	)
+	(text "Can be dropped->\n"
+		(exclude_from_sim no)
+		(at 285.242 87.884 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "7f6f038a-7a3f-47b8-b3c4-de569f00bf34")
+	)
 	(text "From RSA_MODULE"
 		(exclude_from_sim no)
 		(at 140.462 46.228 0)

@@ -4052,6 +4052,28 @@
 		)
 		(uuid "1cb8913d-a694-4376-8ed0-217e3350cf61")
 	)
+	(text "As of now (12/10) 17:52 input to shift is output\nof mux, enbles 2x speed comared to output from\nrreg."
+		(exclude_from_sim no)
+		(at 362.712 134.112 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "1ff189a9-5c3a-44eb-91b3-5a80d1df7430")
+	)
+	(text "X"
+		(exclude_from_sim no)
+		(at 331.47 131.064 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(thickness 0.508)
+				(bold yes)
+			)
+		)
+		(uuid "29ee07c0-788d-468b-8e48-7eefb5cbc17a")
+	)
 	(text "Requirements of use for the above level:\n 1. Under level initially has RVAL = 1\n 2. Set ABVAL = 1 until RVAL = 0, then pull ABVAL = 0 again\n 3. Now the BLAKELEY_MODULE has been initiated and are working\n    with the registers A and B, which has to be unmodified in this peroiod.\n    (while RVAL = 0).\n 4. R is valid when RVAL = 1. BLAKELEY_MODULE does nothing until ABVAL = 1 again."
 		(exclude_from_sim no)
 		(at 16.256 251.206 0)
@@ -4093,6 +4115,16 @@
 			)
 		)
 		(uuid "b9e51b05-88e4-4354-89ad-c834548711a1")
+	)
+	(text "---"
+		(exclude_from_sim no)
+		(at 334.01 133.35 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "c0e44604-9f44-4b8d-b01d-521ecd6214f9")
 	)
 	(text "To RSA_MODULE"
 		(exclude_from_sim no)
@@ -4212,7 +4244,7 @@
 		)
 		(uuid "c8fd3254-a0bf-4716-b73f-dc4acf56885d")
 	)
-	(label "ADEC_RST"
+	(label "AINC_RST"
 		(at 119.38 96.52 180)
 		(fields_autoplaced yes)
 		(effects
@@ -4223,7 +4255,7 @@
 		)
 		(uuid "ce8ba6ef-c4d3-4aae-be33-ff67b90723bc")
 	)
-	(label "ADEC"
+	(label "AINC"
 		(at 119.38 80.01 180)
 		(fields_autoplaced yes)
 		(effects
@@ -4245,7 +4277,7 @@
 		)
 		(uuid "e3275dbf-227a-4b82-80e4-811df17491c2")
 	)
-	(label "ADEC_CLK"
+	(label "AINC_CLK"
 		(at 119.38 86.36 180)
 		(fields_autoplaced yes)
 		(effects

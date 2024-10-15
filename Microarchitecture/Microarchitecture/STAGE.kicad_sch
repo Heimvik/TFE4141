@@ -4840,6 +4840,16 @@
 		)
 		(uuid "3f2a080c-6bd5-49b6-bf8d-69caeed3b8b6")
 	)
+	(text "Interfacing with blakeley_module:\n1: ABVAL 0->1\n2: WAIT FOR RVAL = 1\n3: ABVAL 1->0\n4: RVAL will then go low\nTHe sequence is interruptable with RST."
+		(exclude_from_sim no)
+		(at 144.272 165.608 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "5a63ae95-d31e-4322-b15b-dea9cef2350f")
+	)
 	(text "Old rev 1 BLAKELEY_MODULE ->"
 		(exclude_from_sim no)
 		(at 39.624 28.194 0)

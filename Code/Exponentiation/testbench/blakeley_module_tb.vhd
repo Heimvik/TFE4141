@@ -23,10 +23,6 @@ architecture rtl of blakeley_module_tb is
     signal clk : std_logic;
     signal rst : std_logic;
     
-    signal sum_out : std_logic_vector(c_block_size-1 downto 0);    
-    signal ainc_out : std_logic_vector(log2(c_block_size)-1 downto 0);
-    signal mux_ctl : unsigned(1 downto 0);
-    
     signal blakeley_status : std_logic_vector(num_status_bits-1 downto 0);
     
     constant clk_period : time := 2 ns;
@@ -47,10 +43,6 @@ begin
             ABVAL => ABVAL,
             R => R,
             RVAL => RVAL,
-            
-            sum_out => sum_out,
-            ainc_out => ainc_out,
-            mux_ctl => mux_ctl,
             
             blakeley_status => blakeley_status
         );

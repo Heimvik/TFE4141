@@ -4042,6 +4042,18 @@
 		)
 		(uuid "0768b4c3-74c9-4735-9a1b-2499fa25ccb7")
 	)
+	(text "X"
+		(exclude_from_sim no)
+		(at 81.534 219.71 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(thickness 0.508)
+				(bold yes)
+			)
+		)
+		(uuid "0f3ed424-0702-4592-b00c-fdb254f6b797")
+	)
 	(text "...\n"
 		(exclude_from_sim no)
 		(at 250.444 102.616 0)
@@ -4061,6 +4073,16 @@
 			)
 		)
 		(uuid "1ff189a9-5c3a-44eb-91b3-5a80d1df7430")
+	)
+	(text "Added FINISHED state here"
+		(exclude_from_sim no)
+		(at 81.026 171.958 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "24119acd-9fd2-4161-acb8-da586eba8c8d")
 	)
 	(text "X"
 		(exclude_from_sim no)
@@ -4085,6 +4107,42 @@
 		)
 		(uuid "2d5da4c9-3e1f-486b-a126-2cf3489c3fdf")
 	)
+	(text "X"
+		(exclude_from_sim no)
+		(at 315.468 89.916 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(thickness 0.508)
+				(bold yes)
+			)
+		)
+		(uuid "4070b87b-4ced-4ca2-88a9-6d68461cf757")
+	)
+	(text "X"
+		(exclude_from_sim no)
+		(at 260.858 104.394 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(thickness 0.508)
+				(bold yes)
+			)
+		)
+		(uuid "4a3dbece-103f-4d7c-8976-f368fcfc93b5")
+	)
+	(text "X"
+		(exclude_from_sim no)
+		(at 239.776 104.394 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(thickness 0.508)
+				(bold yes)
+			)
+		)
+		(uuid "639ce93e-bae6-4ee3-bea2-e0263dcff0ff")
+	)
 	(text "NOTE1: DECODER\n\nThe decoder has to be implemented inversely. This means that when the decoder gets input\n'0xFF' the decoded output has to be '0x0'. This is to ensure the MSB scanning of the A\nline and the bitwize mul with the whole B. "
 		(exclude_from_sim no)
 		(at 14.478 274.066 0)
@@ -4095,6 +4153,16 @@
 			(justify left)
 		)
 		(uuid "6f53b5a8-77f0-45c3-b990-004ebec09bb5")
+	)
+	(text "Can be dropped->\n"
+		(exclude_from_sim no)
+		(at 302.26 88.9 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "7f6f038a-7a3f-47b8-b3c4-de569f00bf34")
 	)
 	(text "From RSA_MODULE"
 		(exclude_from_sim no)
@@ -4135,6 +4203,18 @@
 			)
 		)
 		(uuid "cbbabfa4-7414-4a7c-a3ad-4b7d9dc29abc")
+	)
+	(text "X"
+		(exclude_from_sim no)
+		(at 271.78 104.648 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+				(thickness 0.508)
+				(bold yes)
+			)
+		)
+		(uuid "d236d792-3c09-46d3-a2a8-a50afe359f6c")
 	)
 	(text "Reg here? ->"
 		(exclude_from_sim no)

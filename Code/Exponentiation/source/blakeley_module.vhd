@@ -25,11 +25,6 @@ entity blakeley_module is
            ABVAL : in std_logic;
            R : out std_logic_vector (c_block_size-1 downto 0);
            RVAL : out std_logic;
-          
-           --Internals signals made visible for DEBUGGING PURPOSES:
-           sum_out : out std_logic_vector(c_block_size-1 downto 0);    
-           ainc_out : out std_logic_vector(log2(c_block_size)-1 downto 0);
-           mux_ctl : out unsigned(1 downto 0);
            
            -- Optimization possible on these
            blakeley_status : out std_logic_vector(num_upper_status_bits-1 downto 0)
@@ -54,9 +49,6 @@ architecture rtl of blakeley_module is
     
 begin
     blakeley_status <= datapath_status & control_status;
-    sum_out <= sum_out_internal;
-    ainc_out <= ainc_out_internal;
-    mux_ctl <= mux_ctl_internal;
 
     datapath: entity work.blakeley_module_datapath
         generic map(

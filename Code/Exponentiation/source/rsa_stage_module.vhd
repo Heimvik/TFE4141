@@ -35,6 +35,8 @@ entity rsa_stage_module is
     generic (
 		-- Users to add parameters here
 		c_block_size          : integer;
+		log2_c_block_size : integer;
+		
 		c_pipeline_stages     : integer
 	);
     port (             
@@ -49,4 +51,5 @@ entity rsa_stage_module is
         DPI : in std_logic_vector (c_block_size-1 downto 0);
         DCI : in std_logic_vector (c_block_size-1 downto 0));
 end rsa_stage_module;
+
 

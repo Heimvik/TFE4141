@@ -120,17 +120,15 @@ begin
          end case;     
       end process fsm_comb;
       
-      fsm_seq : process(clk) is
+      fsm_seq : process(clk,rst) is
       begin
         if(clk'event and clk = '1') then
-            if rst = '1' then
-                control_state <= IDLE;
-            else
-                control_state <= control_state_nxt;
-            end if;
+            control_state <= control_state_nxt;
+        end if;
+        if rst = '1' then
+            control_state <= IDLE;
         end if;
       end process fsm_seq;
-            
 end architecture rtl;
                     
                 

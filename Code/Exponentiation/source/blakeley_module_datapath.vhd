@@ -116,7 +116,7 @@ begin
     r <= std_logic_vector(r_out);
         
     -- Datapath sequentials
-    datapath_seq : process(clk) is
+    datapath_seq : process(clk,ainc_rst,add_out_rst) is
     begin
         --Gated clocks
         if (clk'event and clk='1') then

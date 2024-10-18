@@ -59,7 +59,7 @@ def splitE(number, keyLength, pipelineStages):
     return decimal_numbers[::-1]
 
 def reportResults():
-    print("\n--- Report Results ---\n")
+    print("\n--- Report results in hex ---\n")
     mismatch_found = False
     
     # Print the header
@@ -71,9 +71,8 @@ def reportResults():
         pipelineResult = data[1]  # Result from the pipeline
         
         expectedResult = pow(M, E, N)
-        
         mismatch = "Yes" if pipelineResult != expectedResult else "No"
-        print(f"{messageID:<15} {pipelineResult:<20} {expectedResult:<20} {mismatch:<10}")
+        print(f"{messageID:<15} {hex(pipelineResult):<20} {hex(expectedResult):<20} {mismatch:<10}")
         
         if pipelineResult != expectedResult:
             print(f"Mismatch found for message ID {messageID}!")
@@ -227,8 +226,9 @@ def blakeleyPipelineController():
         requestNewCase.acquire()
         caseMtx.acquire()
         if cases.qsize() == 0:
-            print("Finished, no more cases left. Awaiting signal from last pipeline stage.")
+            print("Finished, no more cases left. Awaiting signal from last pipeline stage.\n")
             pipelineFinished.acquire()
+            print(f"Results of operation: C = M {hex(E)} mod {hex(N)} (E and N in hex)\n")
             reportProgress()
             reportResults()
             ## Timing test does not make sence in software, as the gains from the pipelining is only existent in HW

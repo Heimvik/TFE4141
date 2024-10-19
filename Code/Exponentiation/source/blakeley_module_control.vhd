@@ -94,9 +94,9 @@ begin
                 -- Delays rval negation by one cycle, allowing the last R to be clocked before entering IDLE
                 if (unsigned(sum_out) < unsigned(n)) then
                     mux_ctl <= to_unsigned(0, 2);
-                elsif (unsigned(sum_out) > unsigned(n) and unsigned(sum_out) <= (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(1, 2);
-                elsif (unsigned(sum_out) > (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(2, 2);
                 end if;
                 add_out_clk_en <= '0';

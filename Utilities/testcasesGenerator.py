@@ -46,7 +46,7 @@ def generate_csv(file_name, num_cases, max_value):
         writer.writerow(['0' * 256, '0' * 256, '0' * 256, '0' * 256, 'EOL'])  # Ensure the end row has the same binary length
 
 if __name__ == "__main__":
-    NUM_CASES = 10  # Set your desired number of cases
-    MAX_VAL = 100  # Set maximum value for n
+    NUM_CASES = 100  # Set your desired number of cases
+    MAX_VAL = 1000  # Set maximum value for n
     file_name = "testcases.csv"
     generate_csv(file_name, NUM_CASES, MAX_VAL)

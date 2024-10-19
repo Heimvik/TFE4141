@@ -13,7 +13,12 @@ entity blakeley_module_control is
         num_status_bits : integer := 32;      
         
         -- Where the control fields ends, and datapath filed starts
-        control_offset : integer := 0
+        control_offset : integer := 0;
+        ainc_clk_en_bit : integer := 0;
+        add_out_clk_en_bit : integer := 1;
+        
+        control_state_size : integer := 2;
+        control_state_offset : integer := 2
     );
     port (
            --Defaults            
@@ -41,11 +46,6 @@ architecture rtl of blakeley_module_control is
     type c_state is (IDLE,START,RUN,FINISHED);
     signal control_state : c_state := IDLE; 
     signal control_state_nxt : c_state;
-    
-    constant ainc_clk_en_bit       : integer := control_offset + 0;
-    constant add_out_clk_en_bit    : integer := control_offset + 1;
-    constant mux_ctl_offset        : integer := control_offset + 2;
-    constant control_state_offset  : integer := control_offset + 4;
 begin    
     fsm_comb : process(control_state,abval,ainc_out,sum_out) is
         variable ainc_limit : unsigned(log2_c_block_size-1 downto 0);
@@ -58,13 +58,12 @@ begin
                 add_out_rst <= '1';
                 
                 mux_ctl <= to_unsigned(0,2);
-                control_status(mux_ctl_offset+1 downto mux_ctl_offset) <= std_logic_vector(to_unsigned(0,2));
                 
                 ainc_clk_en <= '0';
                 add_out_clk_en <= '0';
-                control_status(add_out_clk_en_bit downto ainc_clk_en_bit) <= (others => '0');
+                control_status(control_offset+add_out_clk_en_bit downto control_offset+ainc_clk_en_bit) <= (others => '0');
                 
-                control_status(control_state_offset + 1 downto control_state_offset) <= "00";
+                control_status(control_offset+control_state_offset+control_state_size-1 downto control_offset+control_state_offset) <= "00";
                 if abval'event and abval = '1' then
                     control_state_nxt <= RUN;
                 end if;
@@ -75,20 +74,17 @@ begin
                 
                 add_out_clk_en <= '1';
                 ainc_clk_en <= '1';
-                control_status(add_out_clk_en_bit downto ainc_clk_en_bit) <= (others => '1');
+                control_status(control_offset+add_out_clk_en_bit downto control_offset+ainc_clk_en_bit) <= (others => '1');
                 
                 if (unsigned(sum_out) < unsigned(n)) then
                     mux_ctl <= to_unsigned(0, 2);
-                    control_status(mux_ctl_offset + 1 downto mux_ctl_offset) <= std_logic_vector(to_unsigned(0, 2));
-                elsif (unsigned(sum_out) > unsigned(n) and unsigned(sum_out) <= (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(1, 2);
-                    control_status(mux_ctl_offset + 1 downto mux_ctl_offset) <= std_logic_vector(to_unsigned(1, 2));
-                elsif (unsigned(sum_out) > (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(2, 2);
-                    control_status(mux_ctl_offset + 1 downto mux_ctl_offset) <= std_logic_vector(to_unsigned(2, 2));
                 end if;
                 
-                control_status(control_state_offset + 1 downto control_state_offset) <= "01";
+                control_status(control_offset+control_state_offset + control_state_size-1 downto control_offset+control_state_offset) <= "01";
                 if unsigned(ainc_out) = ainc_limit then
                     ainc_clk_en <= '0';
                     control_state_nxt <= FINISHED;
@@ -98,18 +94,15 @@ begin
                 -- Delays rval negation by one cycle, allowing the last R to be clocked before entering IDLE
                 if (unsigned(sum_out) < unsigned(n)) then
                     mux_ctl <= to_unsigned(0, 2);
-                    control_status(mux_ctl_offset + 1 downto mux_ctl_offset) <= std_logic_vector(to_unsigned(0, 2));
                 elsif (unsigned(sum_out) > unsigned(n) and unsigned(sum_out) <= (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(1, 2);
-                    control_status(mux_ctl_offset + 1 downto mux_ctl_offset) <= std_logic_vector(to_unsigned(1, 2));
                 elsif (unsigned(sum_out) > (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(2, 2);
-                    control_status(mux_ctl_offset + 1 downto mux_ctl_offset) <= std_logic_vector(to_unsigned(2, 2));
                 end if;
                 add_out_clk_en <= '0';
                 rval <= '1';
 
-                control_status(control_state_offset + 1 downto control_state_offset) <= "10";
+                control_status(control_offset+control_state_offset + control_state_size-1 downto control_offset+control_state_offset) <= "10";
                 if(abval'event and abval = '0') then
                     control_state_nxt <= IDLE;
                 end if;

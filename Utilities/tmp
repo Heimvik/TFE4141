@@ -1,0 +1,67 @@
+            -- Print the values read from the CSV
+            report "Running case " & integer'image(case_count) & ": "
+                  & "M = " & current_case_m & ", "
+                  & "ES = " & current_case_es & ", "
+                  & "N = " & current_case_n & ", "
+                  & "Correct C = " & current_case_correct_c;
+
+            --DEBUG:
+            exit;
+    
+            -- Apply key (e,n)
+            es <= std_logic_vector(string_to_unsigned(current_case_es));
+            n <= std_logic_vector(string_to_unsigned(current_case_n));
+    
+            -- Signal inputs transmitted procedure
+            ipo <= '0';
+            ilo <= '0';
+            
+            --Transmit inputs
+            dco <= std_logic_vector(to_unsigned(1, c_block_size));
+            dpo <= std_logic_vector(string_to_unsigned(current_case_m));
+            
+            --Signal inputs transmitted procedure
+            ilo <= '1';
+            wait until ipi = '1' and rising_edge(clk);
+            ilo <= '0';
+            
+            --Wait for output ready signal
+            wait until ili = '1' and rising_edge(clk);
+            
+            --Receive outputs
+            current_case_calculated_c := unsigned(dci(c_block_size - 1 downto 0));
+            
+            --Signal outputs received procedure
+            ipo <= '1';
+            wait until ili = '0' and rising_edge(clk);
+            ipo <= '0';
+    
+            -- Compare the result with the expected solution
+            if current_case_calculated_c = string_to_unsigned(current_case_correct_c) then
+                pass_count := pass_count + 1;
+                report "OK: Case" & integer'image(case_count) & " passed!"
+                severity note;
+            else
+                fail_count := fail_count + 1;
+                
+                report "FAILED: Case " & integer'image(case_count) & 
+                       " failed: expected " & current_case_correct_c & 
+                       ", got " & integer'image(to_integer(current_case_calculated_c))
+                severity error;
+                
+                -- Create the string for the current failed case
+                --failed_cases_tmp := "Case " & integer'image(case_count) & ": "
+                --              & "M = " & current_case_m & ", "
+                --              & "ES = " & current_case_es & ", "
+                --              & "N = " & current_case_n & ", "
+                --              & "Correct C = " & current_case_correct_c & ", "
+                --              & "Calculated C = " & to_string(current_case_calculated_c) & LF;
+                          
+                -- Check if there is enough space in failed_cases for temp_str
+                if failed_cases'length - failed_cases'right >= failed_cases_tmp'length then
+                    failed_cases := failed_cases & failed_cases_tmp;
+                else
+                    report "Failed case string is too long to fit in the buffer" severity error;
+                    exit;
+                end if;
+            end if;

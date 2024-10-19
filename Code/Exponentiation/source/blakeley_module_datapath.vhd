@@ -16,7 +16,16 @@ entity blakeley_module_datapath is
                 
         -- Where the control fields ends, and datapath filed starts
         num_status_bits : integer := 32;
-        datapath_offset : integer := 6
+        datapath_offset : integer := 4;
+        ainc_ierr_bit : integer := 0;
+        mux_ctl_ierr_bit : integer := 1;
+        
+        --Length is log2_c_block_size
+        ainc_debug_offset : integer := 2;
+        
+        mux_ctl_size : integer := 2; 
+        mux_ctl_offset : integer := 10
+        
     );
     port ( 
           --Defaults
@@ -59,12 +68,11 @@ architecture rtl of blakeley_module_datapath is
     signal sub0 : unsigned(c_block_size-1 downto 0);
     signal sub1 : unsigned(c_block_size-1 downto 0);
     signal sub2 : unsigned(c_block_size-1 downto 0);
-    
-    constant ainc_ierr_bit        : integer := datapath_offset + 0;
-    constant mux_ctl_ierr_bit     : integer := datapath_offset + 1;
-    constant ainc_debug_offset    : integer := datapath_offset + 2;
 begin
-
+    -- Debug lines
+    datapath_status(datapath_offset+ainc_debug_offset+log2_c_block_size-1 downto datapath_offset+ainc_debug_offset) <= std_logic_vector(ainc);
+    datapath_status(datapath_offset+mux_ctl_offset+mux_ctl_size-1 downto datapath_offset+mux_ctl_offset) <= std_logic_vector(mux_ctl);
+    
     -- Datapath combinatorials
     ainc_nxt <= ainc + to_unsigned(1,log2_c_block_size);
     sum_out <= std_logic_vector(add_out);
@@ -75,12 +83,12 @@ begin
     begin
         dec_out <= (others => '0');
         ainc_int := to_integer(ainc);
-        datapath_status(ainc_debug_offset+log2_c_block_size-1 downto ainc_debug_offset) <= std_logic_vector(ainc);
+        
         if ainc_int >= 0 and ainc_int < c_block_size then
             dec_out((c_block_size-1) - ainc_int) <= '1';
-            datapath_status(ainc_ierr_bit) <= '0';
+            datapath_status(datapath_offset+ainc_ierr_bit) <= '0';
         else
-            datapath_status(ainc_ierr_bit) <= '1';
+            datapath_status(datapath_offset+ainc_ierr_bit) <= '1';
         end if;
     end process decode_ainc_comb;
         
@@ -105,15 +113,15 @@ begin
         case(to_integer(mux_ctl)) is
             when 0 =>
                 r_out <= sub0;
-                datapath_status(mux_ctl_ierr_bit) <= '0';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 1 =>
                 r_out <= sub1;
-                datapath_status(mux_ctl_ierr_bit) <= '0';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 2 =>
                 r_out <= sub2;
-                datapath_status(mux_ctl_ierr_bit) <= '0';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when others =>
-                datapath_status(mux_ctl_ierr_bit) <= '1';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '1';
         end case;
     end process sel_sub_comb;
 

@@ -12,11 +12,20 @@ use IEEE.numeric_std.all;
 entity blakeley_module_datapath is
     generic (
         c_block_size : integer;
-        
-        num_status_bits : integer := 16;
+        log2_c_block_size : integer;
+                
+        -- Where the control fields ends, and datapath filed starts
+        num_status_bits : integer := 32;
+        datapath_offset : integer := 4;
         ainc_ierr_bit : integer := 0;
-        mux_ctl_ierr_bit : integer := 1;      
-        ainc_debug_offset : integer := 2
+        mux_ctl_ierr_bit : integer := 1;
+        
+        --Length is log2_c_block_size
+        ainc_debug_offset : integer := 2;
+        
+        mux_ctl_size : integer := 2; 
+        mux_ctl_offset : integer := 10
+        
     );
     port ( 
           --Defaults
@@ -36,16 +45,16 @@ entity blakeley_module_datapath is
            mux_ctl : in unsigned(1 downto 0);
 
            sum_out : out std_logic_vector(c_block_size-1 downto 0);
-           ainc_out : out std_logic_vector(log2(c_block_size)-1 downto 0);
+           ainc_out : out std_logic_vector(log2_c_block_size-1 downto 0);
            
            --Status signals
-           datapath_status : out std_logic_vector(num_status_bits-1 downto 0)
+           datapath_status : out std_logic_vector(num_status_bits-1 downto 0) := (others => '0')
     );
 end blakeley_module_datapath;
 
 architecture rtl of blakeley_module_datapath is
-    signal ainc : unsigned(log2(c_block_size)-1 downto 0);
-    signal ainc_nxt : unsigned(log2(c_block_size)-1 downto 0);
+    signal ainc : unsigned(log2_c_block_size-1 downto 0);
+    signal ainc_nxt : unsigned(log2_c_block_size-1 downto 0);
     
     signal r_out : unsigned (c_block_size-1 downto 0);
 
@@ -60,9 +69,12 @@ architecture rtl of blakeley_module_datapath is
     signal sub1 : unsigned(c_block_size-1 downto 0);
     signal sub2 : unsigned(c_block_size-1 downto 0);
 begin
-
+    -- Debug lines
+    datapath_status(datapath_offset+ainc_debug_offset+log2_c_block_size-1 downto datapath_offset+ainc_debug_offset) <= std_logic_vector(ainc);
+    datapath_status(datapath_offset+mux_ctl_offset+mux_ctl_size-1 downto datapath_offset+mux_ctl_offset) <= std_logic_vector(mux_ctl);
+    
     -- Datapath combinatorials
-    ainc_nxt <= ainc + to_unsigned(1,log2(c_block_size));
+    ainc_nxt <= ainc + to_unsigned(1,log2_c_block_size);
     sum_out <= std_logic_vector(add_out);
     ainc_out <= std_logic_vector(ainc);
     
@@ -71,12 +83,12 @@ begin
     begin
         dec_out <= (others => '0');
         ainc_int := to_integer(ainc);
-        datapath_status(ainc_debug_offset+log2(c_block_size)-1 downto ainc_debug_offset) <= std_logic_vector(ainc);
+        
         if ainc_int >= 0 and ainc_int < c_block_size then
             dec_out((c_block_size-1) - ainc_int) <= '1';
-            datapath_status(ainc_ierr_bit) <= '0';
+            datapath_status(datapath_offset+ainc_ierr_bit) <= '0';
         else
-            datapath_status(ainc_ierr_bit) <= '1';
+            datapath_status(datapath_offset+ainc_ierr_bit) <= '1';
         end if;
     end process decode_ainc_comb;
         
@@ -101,22 +113,22 @@ begin
         case(to_integer(mux_ctl)) is
             when 0 =>
                 r_out <= sub0;
-                datapath_status(mux_ctl_ierr_bit) <= '0';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 1 =>
                 r_out <= sub1;
-                datapath_status(mux_ctl_ierr_bit) <= '0';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 2 =>
                 r_out <= sub2;
-                datapath_status(mux_ctl_ierr_bit) <= '0';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when others =>
-                datapath_status(mux_ctl_ierr_bit) <= '1';
+                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '1';
         end case;
     end process sel_sub_comb;
 
     r <= std_logic_vector(r_out);
         
     -- Datapath sequentials
-    datapath_seq : process(clk) is
+    datapath_seq : process(clk,ainc_rst,add_out_rst) is
     begin
         --Gated clocks
         if (clk'event and clk='1') then
@@ -130,7 +142,7 @@ begin
         
         -- Asynchronus reset
         if (ainc_rst = '1') then
-            ainc <= to_unsigned(0,log2(C_BLOCK_SIZE));
+            ainc <= to_unsigned(0,log2_c_block_size);
         end if;
         
         if (add_out_rst = '1') then

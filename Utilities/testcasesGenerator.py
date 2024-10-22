@@ -47,6 +47,6 @@ def generate_csv(file_name, num_cases, max_value):
 
 if __name__ == "__main__":
     NUM_CASES = 100  # Set your desired number of cases
-    MAX_VAL = 1000  # Set maximum value for n
+    MAX_VAL = int(2**250)  # Set maximum value for n
     file_name = "testcases.csv"
     generate_csv(file_name, NUM_CASES, MAX_VAL)

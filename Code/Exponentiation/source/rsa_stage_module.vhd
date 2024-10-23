@@ -4,10 +4,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity rsa_stage_module is
     generic (
 		-- Users to add parameters here
-		c_block_size          : integer;
-		log2_c_block_size     : integer;
+		c_block_size          : integer := 256;
+		log2_c_block_size     : integer := 8;
 		
-		c_pipeline_stages     : integer;
+		c_pipeline_stages     : integer := 1;
 		
 		num_status_bits       : integer := 32
 	);
@@ -38,6 +38,9 @@ end rsa_stage_module;
 
 architecture rtl of rsa_stage_module is
     --Internal singnals
+    --Extended by one bit to enable no overflow when doing sll 1 in blakeley module
+    signal n_extended : std_logic_vector(c_block_size+1 downto 0);
+    
     signal c_mux_ctl : std_logic;
     signal p_mux_ctl : std_logic;
     
@@ -58,6 +61,7 @@ architecture rtl of rsa_stage_module is
 
 begin
     rsm_status <= datapath_status or control_status;
+    n_extended <= "00" & N;
     
     datapath: entity work.rsa_stage_module_datapath
         generic map(
@@ -67,7 +71,7 @@ begin
         port map(
             clk => CLK,
             
-            n => N,
+            n => n_extended,
             dco => DCO,
             dpo => DPO,
             dci => DCI,

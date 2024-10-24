@@ -31,7 +31,7 @@
 	)
 	(text "..."
 		(exclude_from_sim no)
-		(at 170.434 84.836 0)
+		(at 168.91 84.836 0)
 		(effects
 			(font
 				(size 2.54 2.54)

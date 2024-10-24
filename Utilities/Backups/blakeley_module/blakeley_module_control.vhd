@@ -25,7 +25,7 @@ entity blakeley_module_control is
            clk : in std_logic;
            rst : in std_logic;
 
-           n : in std_logic_vector (c_block_size-1 downto 0);
+           n : in std_logic_vector (c_block_size+1 downto 0);
            abval : in std_logic;
            rval : out std_logic;
            
@@ -36,7 +36,7 @@ entity blakeley_module_control is
            mux_ctl : out unsigned(1 downto 0);
            
            ainc_out : in std_logic_vector(log2_c_block_size-1 downto 0);
-           sum_out : in std_logic_vector(c_block_size-1 downto 0);
+           sum_out : in std_logic_vector(c_block_size+1 downto 0); --NB: To avoid overflow (MAY have to be one more bit?)
           
            control_status : out std_logic_vector(num_status_bits-1 downto 0) := (others => '0')
     );
@@ -78,9 +78,9 @@ begin
                 
                 if (unsigned(sum_out) < unsigned(n)) then
                     mux_ctl <= to_unsigned(0, 2);
-                elsif (unsigned(sum_out) > unsigned(n) and unsigned(sum_out) <= (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(1, 2);
-                elsif (unsigned(sum_out) > (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(2, 2);
                 end if;
                 
@@ -94,9 +94,9 @@ begin
                 -- Delays rval negation by one cycle, allowing the last R to be clocked before entering IDLE
                 if (unsigned(sum_out) < unsigned(n)) then
                     mux_ctl <= to_unsigned(0, 2);
-                elsif (unsigned(sum_out) > unsigned(n) and unsigned(sum_out) <= (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(1, 2);
-                elsif (unsigned(sum_out) > (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(2, 2);
                 end if;
                 add_out_clk_en <= '0';

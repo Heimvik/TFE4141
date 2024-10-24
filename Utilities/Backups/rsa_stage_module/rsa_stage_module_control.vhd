@@ -76,6 +76,8 @@ architecture rsa of rsa_stage_module_control is
     
     signal ilo_internal : std_logic;
     signal ipo_internal : std_logic;
+    
+    constant es_size : integer := c_block_size/c_pipeline_stages;
 
 begin
     control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
@@ -104,12 +106,16 @@ begin
                 p_reg_clk_en <= '0';
                 
                 if ili = '1' then
+                    c_reg_rst <= '1';
+                    p_reg_rst <= '1';
                     stage_state_nxt <= SAVE_IN;
                 end if;
                 
             when SAVE_IN =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "001";
                 --Enable clock in intermediates
+                c_reg_rst <= '0';
+                p_reg_rst <= '0';
                 --Watch the hold time here!
                 c_reg_clk_en <= '1';
                 p_reg_clk_en <= '1';
@@ -171,10 +177,12 @@ begin
                         --Wait for RVAL negation
                         if c_bm_rval = '0' and p_bm_rval = '0' then
                             blakeley_module_state_nxt <= INIT;
-                            if es_index = to_unsigned((c_block_size/c_pipeline_stages)-1,log2_c_block_size) then
+                            if es_index = to_unsigned(es_size-1,log2_c_block_size) then
+                                es_index <= to_unsigned(0,log2_c_block_size);
                                 stage_state_nxt <= HOLD_OUT;
+                            else
+                                es_index <= es_index + 1;
                             end if;
-                            es_index <= es_index + 1;
                         end if;
                     when P_FINISHED =>
                         control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "10";
@@ -187,10 +195,12 @@ begin
                         --Wait for RVAL negation
                         if p_bm_rval = '0' then
                             blakeley_module_state_nxt <= INIT;
-                            if es_index = to_unsigned((c_block_size/c_pipeline_stages)-1,log2_c_block_size) then
+                            if es_index = to_unsigned(es_size-1,log2_c_block_size) then
+                                es_index <= to_unsigned(0,log2_c_block_size);
                                 stage_state_nxt <= HOLD_OUT;
+                            else
+                                es_index <= es_index + 1;
                             end if;
-                            es_index <= es_index + 1;
                         end if;
                     when others=>
                 end case;
@@ -215,12 +225,12 @@ begin
         if rst = '1' then
             stage_state <= IDLE;
             rst_bms <= '1';
-            p_reg_rst <= '1';
-            c_reg_rst <= '1';
+            --p_reg_rst <= '1';
+            --c_reg_rst <= '1';
         else
             rst_bms <= '0';
-            p_reg_rst <= '0';
-            c_reg_rst <= '0';
+            --p_reg_rst <= '0';
+            --c_reg_rst <= '0';
         end if;
     end process fsm_seq;
 end architecture rsa;

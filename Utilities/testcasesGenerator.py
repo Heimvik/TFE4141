@@ -119,7 +119,7 @@ def generate_csv(m_file, k_file, num_cases,min_value, max_value):
         writerK = csv.writer(key_file)
         binary_e, binary_n = generate_key(min_value,max_value)
         writerK.writerow([binary_e, binary_n, 'EOL'])
-        print(f"Generated key - e: {hex(int(binary_e,2))} (length: {len(binary_e)}), n: {hex(int(binary_n,2))} (length: {len(binary_e)})\n")
+        print(f"\nGenerated key - e: {hex(int(binary_e,2))} (length: {len(binary_e)}), n: {hex(int(binary_n,2))} (length: {len(binary_e)})\n")
 
     with open(m_file, mode='w', newline='') as message_file:
         writerM = csv.writer(message_file)

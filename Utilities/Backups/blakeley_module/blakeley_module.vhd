@@ -23,7 +23,7 @@ entity blakeley_module is
             
            A : in std_logic_vector (c_block_size-1 downto 0);
            B : in std_logic_vector (c_block_size-1 downto 0);
-           N : in std_logic_vector (c_block_size-1 downto 0);
+           N : in std_logic_vector (c_block_size+1 downto 0); --NB: To avoid overflow
            ABVAL : in std_logic;
            R : out std_logic_vector (c_block_size-1 downto 0);
            RVAL : out std_logic;
@@ -39,7 +39,7 @@ architecture rtl of blakeley_module is
     signal add_out_rst : std_logic;
 
     --Temporary solution while debugging (remove _internal when finished)
-    signal sum_out_internal : std_logic_vector(c_block_size-1 downto 0);    
+    signal sum_out_internal : std_logic_vector(c_block_size+1 downto 0);    
     signal ainc_out_internal : std_logic_vector(log2_c_block_size-1 downto 0);
     
     signal mux_ctl_internal : unsigned(1 downto 0);

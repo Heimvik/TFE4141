@@ -42,9 +42,9 @@ begin
             N => N,
             ABVAL => ABVAL,
             R => R,
-            RVAL => RVAL,
+            RVAL => RVAL
             
-            blakeley_status => blakeley_status
+            --blakeley_status => blakeley_status
         );
     
     clk_gen: process

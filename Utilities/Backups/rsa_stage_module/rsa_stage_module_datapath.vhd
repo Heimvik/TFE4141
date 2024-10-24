@@ -23,7 +23,7 @@ entity rsa_stage_module_datapath is
         clk : in std_logic;
 
         --Data signals
-        n : in std_logic_vector (c_block_size-1 downto 0);
+        n : in std_logic_vector (c_block_size+1 downto 0); --NB: To avoid overflow
         dco : out std_logic_vector (c_block_size-1 downto 0);
         dpo : out std_logic_vector (c_block_size-1 downto 0);
         dci : in std_logic_vector (c_block_size-1 downto 0);

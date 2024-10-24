@@ -45,10 +45,10 @@ entity blakeley_module_datapath is
            mux_ctl : in unsigned(1 downto 0);
 
            sum_out : out std_logic_vector(c_block_size+1 downto 0);   --NB: To avoid overflow
-           ainc_out : out std_logic_vector(log2_c_block_size-1 downto 0);
+           ainc_out : out std_logic_vector(log2_c_block_size-1 downto 0)
            
            --Status signals
-           datapath_status : out std_logic_vector(num_status_bits-1 downto 0) := (others => '0')
+           --datapath_status : out std_logic_vector(num_status_bits-1 downto 0) := (others => '0')
     );
 end blakeley_module_datapath;
 
@@ -70,8 +70,8 @@ architecture rtl of blakeley_module_datapath is
     signal sub2 : unsigned(c_block_size+1 downto 0);
 begin
     -- Debug lines
-    datapath_status(datapath_offset+ainc_debug_offset+log2_c_block_size-1 downto datapath_offset+ainc_debug_offset) <= std_logic_vector(ainc);
-    datapath_status(datapath_offset+mux_ctl_offset+mux_ctl_size-1 downto datapath_offset+mux_ctl_offset) <= std_logic_vector(mux_ctl);
+    --datapath_status(datapath_offset+ainc_debug_offset+log2_c_block_size-1 downto datapath_offset+ainc_debug_offset) <= std_logic_vector(ainc);
+    --datapath_status(datapath_offset+mux_ctl_offset+mux_ctl_size-1 downto datapath_offset+mux_ctl_offset) <= std_logic_vector(mux_ctl);
     
     -- Datapath combinatorials
     ainc_nxt <= ainc + to_unsigned(1,log2_c_block_size);
@@ -86,9 +86,9 @@ begin
         
         if ainc_int >= 0 and ainc_int < c_block_size then
             dec_out((c_block_size-1) - ainc_int) <= '1';
-            datapath_status(datapath_offset+ainc_ierr_bit) <= '0';
+            --datapath_status(datapath_offset+ainc_ierr_bit) <= '0';
         else
-            datapath_status(datapath_offset+ainc_ierr_bit) <= '1';
+            --datapath_status(datapath_offset+ainc_ierr_bit) <= '1';
         end if;
     end process decode_ainc_comb;
         
@@ -113,15 +113,16 @@ begin
         case(to_integer(mux_ctl)) is
             when 0 =>
                 r_out <= sub0(c_block_size-1 downto 0);
-                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
+                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 1 =>
                 r_out <= sub1(c_block_size-1 downto 0);
-                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
+                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 2 =>
                 r_out <= sub2(c_block_size-1 downto 0);
-                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
+                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when others =>
-                datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '1';
+                --r_out <= sub0(c_block_size-1 downto 0);   --NBNB! ADDS 20K LUTS!
+                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '1';
         end case;
     end process sel_sub_comb;
 

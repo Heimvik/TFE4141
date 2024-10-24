@@ -77,20 +77,6 @@ begin
     ainc_nxt <= ainc + to_unsigned(1,log2_c_block_size);
     sum_out <= std_logic_vector(add_out);
     ainc_out <= std_logic_vector(ainc);
-    
-    decode_ainc_comb : process(ainc) is
-        variable ainc_int : integer;
-    begin
-        dec_out <= (others => '0');
-        ainc_int := to_integer(ainc);
-        
-        if ainc_int >= 0 and ainc_int < c_block_size then
-            dec_out((c_block_size-1) - ainc_int) <= '1';
-            --datapath_status(datapath_offset+ainc_ierr_bit) <= '0';
-        else
-            --datapath_status(datapath_offset+ainc_ierr_bit) <= '1';
-        end if;
-    end process decode_ainc_comb;
         
     sel_a_comb : process (a,b,ainc) is
     begin

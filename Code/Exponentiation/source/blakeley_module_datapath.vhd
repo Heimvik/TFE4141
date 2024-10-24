@@ -107,8 +107,6 @@ begin
                 r_out <= sub2(c_block_size-1 downto 0);
                 --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when others =>
-                --r_out <= sub0(c_block_size-1 downto 0);   --NBNB! ADDS 20K LUTS!
-                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '1';
         end case;
     end process sel_sub_comb;
 

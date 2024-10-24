@@ -86,10 +86,8 @@ begin
                     mux_ctl <= to_unsigned(0, 2);
                 elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(1, 2);
-                elsif (unsigned(sum_out) >= (unsigned(n) sll 1)) then
-                    mux_ctl <= to_unsigned(2, 2);
                 else
-                    mux_ctl <= to_unsigned(0, 2);
+                    mux_ctl <= to_unsigned(2, 2);
                 end if;
                 
                 --control_status(control_offset+control_state_offset + control_state_size-1 downto control_offset+control_state_offset) <= "01";
@@ -117,10 +115,8 @@ begin
                     mux_ctl <= to_unsigned(0, 2);
                 elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
                     mux_ctl <= to_unsigned(1, 2);
-                elsif (unsigned(sum_out) >= (unsigned(n) sll 1)) then
-                    mux_ctl <= to_unsigned(2, 2);
                 else
-                    mux_ctl <= to_unsigned(0, 2);
+                    mux_ctl <= to_unsigned(2, 2);
                 end if;
 
                 --control_status(control_offset+control_state_offset + control_state_size-1 downto control_offset+control_state_offset) <= "10";

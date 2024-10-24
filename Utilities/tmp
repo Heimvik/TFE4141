@@ -84,12 +84,12 @@ begin
     control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
     control_status(control_offset+ipo_bit downto control_offset+ilo_bit) <= ipo_internal & ilo_internal;
     control_status(control_offset+p_bm_rval_bit downto control_offset+c_bm_rval_bit) <= p_bm_rval & c_bm_rval;
+    control_status(control_offset+es_index_offset+log2_c_block_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
     ilo <= ilo_internal;
     ipo <= ipo_internal;
     
     fsm_comb : process(stage_state,blakeley_module_state,ili,es,c_bm_rval,p_bm_rval,ipi) is
     begin
-        control_status(control_offset+es_index_offset+log2_c_block_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
         case(stage_state) is
             when IDLE =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "000";
@@ -264,6 +264,7 @@ begin
                             stage_state_nxt <= RUN_BM;
                         end if;
                     when others=>
+                        control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "11";
                         c_reg_clk_en <= '0';
                         p_reg_clk_en <= '0';
                                         
@@ -299,6 +300,9 @@ begin
                     stage_state_nxt <= HOLD_OUT;
                 end if;
             when others =>
+                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "111";
+                control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "11";
+                
                 ilo_internal <= '0';
                 ipo_internal <= '0';
                 
@@ -330,12 +334,8 @@ begin
         if rst = '1' then
             stage_state <= IDLE;
             rst_bms <= '1';
-            --p_reg_rst <= '1';
-            --c_reg_rst <= '1';
         else
             rst_bms <= '0';
-            --p_reg_rst <= '0';
-            --c_reg_rst <= '0';
         end if;
     end process fsm_seq;
 end architecture rsa;

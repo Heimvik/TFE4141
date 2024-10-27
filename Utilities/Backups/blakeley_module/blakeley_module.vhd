@@ -26,9 +26,9 @@ entity blakeley_module is
            N : in std_logic_vector (c_block_size+1 downto 0); --NB: To avoid overflow
            ABVAL : in std_logic;
            R : out std_logic_vector (c_block_size-1 downto 0);
-           RVAL : out std_logic;
+           RVAL : out std_logic
            
-           blakeley_status : out std_logic_vector(num_upper_status_bits-1 downto 0)
+           --blakeley_status : out std_logic_vector(num_upper_status_bits-1 downto 0)
     );
 end blakeley_module;
 
@@ -44,12 +44,12 @@ architecture rtl of blakeley_module is
     
     signal mux_ctl_internal : unsigned(1 downto 0);
     
-    signal control_status : std_logic_vector(num_lower_status_bits-1 downto 0);
-    signal datapath_status : std_logic_vector(num_lower_status_bits-1 downto 0);
+    --signal control_status : std_logic_vector(num_lower_status_bits-1 downto 0);
+    --signal datapath_status : std_logic_vector(num_lower_status_bits-1 downto 0);
     
     
 begin
-    blakeley_status <= datapath_status or control_status;
+    --blakeley_status <= datapath_status or control_status;
 
     datapath: entity work.blakeley_module_datapath
         generic map(
@@ -73,9 +73,9 @@ begin
             sum_out => sum_out_internal,
             ainc_out => ainc_out_internal,
             
-            mux_ctl => mux_ctl_internal,
+            mux_ctl => mux_ctl_internal
             
-            datapath_status => datapath_status
+            --datapath_status => datapath_status
         );
     control : entity work.blakeley_module_control
         generic map(
@@ -99,8 +99,8 @@ begin
             sum_out => sum_out_internal,
             ainc_out => ainc_out_internal,
  
-            mux_ctl => mux_ctl_internal,
+            mux_ctl => mux_ctl_internal
 
-            control_status => control_status
+            --control_status => control_status
         );
 end rtl;

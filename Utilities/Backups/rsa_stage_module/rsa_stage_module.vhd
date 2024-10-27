@@ -56,11 +56,12 @@ architecture rtl of rsa_stage_module is
     
     signal rst_bms : std_logic;
     
-    signal datapath_status : std_logic_vector(num_status_bits-1 downto 0);
+    --signal datapath_status : std_logic_vector(num_status_bits-1 downto 0);
     signal control_status : std_logic_vector(num_status_bits-1 downto 0);
 
 begin
-    rsm_status <= datapath_status or control_status;
+    rsm_status <= control_status;--datapath_status or control_status;
+    bm_status <= (others => '0');
     n_extended <= "00" & N;
     
     datapath: entity work.rsa_stage_module_datapath
@@ -90,10 +91,10 @@ begin
             p_bm_abval => p_bm_abval,
             p_bm_rval => p_bm_rval,
             
-            rst_bms => rst_bms,
+            rst_bms => rst_bms
             
-            bm_status => bm_status,
-            datapath_status => datapath_status
+            --bm_status => bm_status,
+            --datapath_status => datapath_status
         );
 
     control: entity work.rsa_stage_module_control

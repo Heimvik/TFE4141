@@ -68,15 +68,26 @@ end rsa_core;
 
 architecture rtl of rsa_core is
 begin
--- Instatnitation of AXI_RECEIVE_MODULE
-    -- generic map
-    -- port map
-    
--- Instatniation of M BLAKELEY_STAGE_MODULE in pipeline configuration using "generate"
-    -- generic map
-    -- port map
-
--- Instatniation of AXI_TRANSMIT_MODULE
-    -- generic map
-    -- port map
+    rsa_core : entity work.rsa_core_pipeline
+    generic map(
+        c_block_size => c_block_size,
+        c_pipeline_stages => c_pipeline_stages
+    )
+    port map(
+        valid_in => msgin_valid,
+        ready_in => msgin_ready,
+        
+        message => msgin_data,
+        key => key_e_d,
+        
+        ready_out => msgout_ready,
+        valid_out => msgout_valid,
+        
+        result => msgout_data,
+        
+        modulus => key_n,
+        
+        clk => clk,
+        reset_n => rst
+    );
 end rtl;

@@ -44,11 +44,11 @@ entity rsa_stage_module_datapath is
         p_bm_rval : out std_logic;
 
         
-        rst_bms : in std_logic;
+        rst_bms : in std_logic
         
         --Status signals 
-        bm_status : out std_logic_vector(num_status_bits-1 downto 0);
-        datapath_status : out std_logic_vector(num_status_bits-1 downto 0) := (others=>'0')
+        --bm_status : out std_logic_vector(num_status_bits-1 downto 0);
+        --datapath_status : out std_logic_vector(num_status_bits-1 downto 0) := (others=>'0')
     );
 end rsa_stage_module_datapath;
 
@@ -69,11 +69,11 @@ architecture rtl of rsa_stage_module_datapath is
     signal p_bm_status : std_logic_vector(num_status_bits-1 downto 0);
    
 begin
-    datapath_status(datapath_offset+p_mux_ctl_bit downto datapath_offset+c_mux_ctl_bit)         <= p_mux_ctl & c_mux_ctl;
-    datapath_status(datapath_offset+p_bm_abval_bit downto datapath_offset+c_bm_abval_bit)       <= p_bm_abval & c_bm_abval;
-    datapath_status(datapath_offset+p_reg_clk_en_bit downto datapath_offset+c_reg_clk_en_bit)   <= p_reg_clk_en & c_reg_clk_en;
-    datapath_status(datapath_offset+p_reg_rst_bit downto datapath_offset+c_reg_rst_bit)         <= p_reg_rst & c_reg_rst;
-    bm_status <= std_logic_vector(unsigned(c_bm_status) sll 16) or p_bm_status;
+    --datapath_status(datapath_offset+p_mux_ctl_bit downto datapath_offset+c_mux_ctl_bit)         <= p_mux_ctl & c_mux_ctl;
+    --datapath_status(datapath_offset+p_bm_abval_bit downto datapath_offset+c_bm_abval_bit)       <= p_bm_abval & c_bm_abval;
+    --datapath_status(datapath_offset+p_reg_clk_en_bit downto datapath_offset+c_reg_clk_en_bit)   <= p_reg_clk_en & c_reg_clk_en;
+    --datapath_status(datapath_offset+p_reg_rst_bit downto datapath_offset+c_reg_rst_bit)         <= p_reg_rst & c_reg_rst;
+    --bm_status <= std_logic_vector(unsigned(c_bm_status) sll 16) or p_bm_status;
     
     sel_c_comb : process(c_mux_ctl,dci,c_bm_out) is
     begin
@@ -98,16 +98,16 @@ begin
             N => n,
             ABVAL => c_bm_abval,
             R => c_bm_out,
-            RVAL => c_bm_rval,
+            RVAL => c_bm_rval
             
-            blakeley_status => c_bm_status
+            --blakeley_status => c_bm_status
         );
         
     dco <= c;
         
     sel_p_comb : process(p_mux_ctl,dpi,p_bm_out) is
     begin
-        datapath_status(datapath_offset + p_mux_ctl_bit) <= p_mux_ctl;
+        --datapath_status(datapath_offset + p_mux_ctl_bit) <= p_mux_ctl;
         if p_mux_ctl = '0' then
             p_nxt <= dpi;
         else
@@ -128,9 +128,9 @@ begin
             N => n,
             ABVAL => p_bm_abval,
             R => p_bm_out,
-            RVAL => p_bm_rval,
+            RVAL => p_bm_rval
             
-            blakeley_status => p_bm_status
+            --blakeley_status => p_bm_status
         );
         
     dpo <= p;

@@ -112,8 +112,7 @@ begin
         DPO => open,
         DCO => result,
         
-        rsm_status => rsm_status,
-        bm_status => bm_status
+        rsm_status => rsm_status
     );
     
     --Iterface to AXI output stream

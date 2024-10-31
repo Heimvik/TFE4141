@@ -4,16 +4,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity rsa_stage_module is
     generic (
 		-- Users to add parameters here
-		c_block_size          : integer := 256;
-		log2_c_block_size     : integer := 8;
+		c_block_size          : integer;
+		log2_c_block_size     : integer;
 		
-		c_pipeline_stages     : integer := 1;
+		num_pipeline_stages     : integer;
 		
-		num_status_bits       : integer := 32
+		num_status_bits       : integer
 	);
     port (
         CLK : in std_logic;
-        RST : in std_logic;
+        RST_N : in std_logic;
         
         --Control signals             
         ILI : in std_logic;
@@ -21,7 +21,7 @@ entity rsa_stage_module is
         IPO : out std_logic;
         ILO : out std_logic;
         N : in std_logic_vector (c_block_size-1 downto 0);
-        ES : in std_logic_vector ((c_block_size/c_pipeline_stages)-1 downto 0);
+        ES : in std_logic_vector ((c_block_size/num_pipeline_stages)-1 downto 0);
         
         --Data signals
         DPO : out std_logic_vector (c_block_size-1 downto 0);
@@ -29,9 +29,8 @@ entity rsa_stage_module is
         DPI : in std_logic_vector (c_block_size-1 downto 0);
         DCI : in std_logic_vector (c_block_size-1 downto 0);
         
-        --Status registers
-        rsm_status : out std_logic_vector(num_status_bits-1 downto 0);
-        bm_status : out std_logic_vector(num_status_bits-1 downto 0)
+        --Status register
+        rsm_status : out std_logic_vector(num_status_bits-1 downto 0)
     );
 end rsa_stage_module;
 
@@ -56,13 +55,11 @@ architecture rtl of rsa_stage_module is
     
     signal rst_bms : std_logic;
     
-    --signal datapath_status : std_logic_vector(num_status_bits-1 downto 0);
     signal control_status : std_logic_vector(num_status_bits-1 downto 0);
 
 begin
-    rsm_status <= control_status;--datapath_status or control_status;
-    bm_status <= (others => '0');
     n_extended <= "00" & N;
+    rsm_status <= control_status;
     
     datapath: entity work.rsa_stage_module_datapath
         generic map(
@@ -92,9 +89,6 @@ begin
             p_bm_rval => p_bm_rval,
             
             rst_bms => rst_bms
-            
-            --bm_status => bm_status,
-            --datapath_status => datapath_status
         );
 
     control: entity work.rsa_stage_module_control
@@ -102,12 +96,12 @@ begin
             c_block_size => c_block_size,
             log2_c_block_size => log2_c_block_size,
             
-            c_pipeline_stages => c_pipeline_stages,
+            num_pipeline_stages => num_pipeline_stages,
             num_status_bits => num_status_bits
         )
         port map(
             clk => CLK,
-            rst => RST,
+            rst_n => RST_N,
             
             es => ES,
             ili => ILI,

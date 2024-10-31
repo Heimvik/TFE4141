@@ -22,7 +22,7 @@ use ieee.numeric_std.all;
 entity rsa_core is
 	generic (
         c_block_size : integer  := 256;
-        c_pipeline_stages : integer := 16;
+        num_pipeline_stages : integer := 16;
         log2_c_block_size : integer := 8;
         log2_max_message_count : integer := 16;
         num_status_bits : integer := 32
@@ -76,7 +76,13 @@ architecture rtl of rsa_core is
     
     --Status registers
     signal rsm_status : std_logic_vector(num_status_bits-1 downto 0);
-    signal bm_status : std_logic_vector(num_status_bits-1 downto 0);
+    type pc_state is (COUNT,SAVE);
+    signal performance_counter_state : pc_state := COUNT;
+    signal num_cycles_last_case : unsigned(15 downto 0) := to_unsigned(0,16);
+    signal num_cycles_last_case_nxt : unsigned(15 downto 0) := to_unsigned(0,16);
+    signal clk_counter : unsigned(15 downto 0) := to_unsigned(0,16);
+    signal clk_counter_nxt : unsigned(15 downto 0) := to_unsigned(0,16);
+
 
     --States
     type ai_state is (GET_FROM_AXI,HOLD_FOR_PIPELINE);
@@ -86,10 +92,21 @@ architecture rtl of rsa_core is
     signal axi_out_state : ao_state := WAIT_FOR_PIPELINE;
     signal axi_out_state_nxt : ao_state := WAIT_FOR_PIPELINE;
 
-    type fifo_counter is array (c_pipeline_stages-1 downto 0) of unsigned(log2_max_message_count-1 downto 0);
+    type fifo_counter is array (num_pipeline_stages-1 downto 0) of unsigned(log2_max_message_count-1 downto 0);
     signal message_counter_target : fifo_counter;
+    signal message_counter_target_nxt : fifo_counter;
     
-    function inc_or_mod(ptr : integer; max_value : integer) return integer is
+    signal message_counter_in : unsigned(log2_max_message_count-1 downto 0) := to_unsigned(0,log2_max_message_count);
+    signal message_counter_in_nxt : unsigned(log2_max_message_count-1 downto 0) := to_unsigned(0,log2_max_message_count);
+    signal message_counter_target_wr_ptr : integer := 0;
+    signal message_counter_target_wr_ptr_nxt : integer := 0;
+    
+    signal message_counter_out : unsigned(log2_max_message_count-1 downto 0) := to_unsigned(0,log2_max_message_count);
+    signal message_counter_out_nxt : unsigned(log2_max_message_count-1 downto 0) := to_unsigned(0,log2_max_message_count);
+    signal message_counter_target_rd_ptr : integer := 0;
+    signal message_counter_target_rd_ptr_nxt : integer := 0;
+    
+    function circular_increment(ptr : integer; max_value : integer) return integer is
     begin
         if ptr >= max_value then
             return 0;
@@ -98,23 +115,26 @@ architecture rtl of rsa_core is
         end if;
     end function;
 begin
+    rsa_status <= std_logic_vector(num_cycles_last_case) & rsm_status(31 downto 16);
+    
     --Iterface to AXI input stream
     axi_in : process(ipi,axi_in_state,msgin_valid) is
-        variable message_counter_in : unsigned(log2_max_message_count-1 downto 0) := to_unsigned(0,log2_max_message_count);
-        variable message_counter_target_wr_ptr : integer := 0;
+        
     begin
         case axi_in_state is
             when GET_FROM_AXI =>
                 --Signal to next stage that axi_in is entering IDLE and is open for new data
                 ilo <= '0';
                 msgin_ready <= '0';
+                message_counter_target_nxt <= message_counter_target;
+                message_counter_target_wr_ptr_nxt <= message_counter_target_wr_ptr;
                                 
                 --Enter hold state for next stage if it is ready for new values (ipi = '0') and data in is valid (msgin_valid = '1')
                 if ipi = '0' and msgin_valid = '1' then
-                    message_counter_in := message_counter_in + 1;
+                    message_counter_in_nxt <= message_counter_in + 1;
                     axi_in_state_nxt <= HOLD_FOR_PIPELINE;
                 else
-                    message_counter_in := message_counter_in;
+                    message_counter_in_nxt <= message_counter_in;
                     axi_in_state_nxt <= GET_FROM_AXI;
                 end if;
             
@@ -127,13 +147,20 @@ begin
                     axi_in_state_nxt <= GET_FROM_AXI;
                     msgin_ready <= '1';
                     if msgin_last = '1' then
-                        message_counter_target(message_counter_target_wr_ptr) <= message_counter_in;
-                        message_counter_target_wr_ptr := inc_or_mod(message_counter_target_wr_ptr,c_pipeline_stages-1);
-                        message_counter_in := to_unsigned(0,log2_max_message_count);
+                        message_counter_target_nxt(message_counter_target_wr_ptr) <= message_counter_in;
+                        message_counter_target_wr_ptr_nxt <= circular_increment(message_counter_target_wr_ptr,num_pipeline_stages-1);
+                        message_counter_in_nxt <= to_unsigned(0,log2_max_message_count);
+                    else
+                        message_counter_target_nxt <= message_counter_target;
+                        message_counter_target_wr_ptr_nxt <= message_counter_target_wr_ptr;
+                        message_counter_in_nxt <= message_counter_in;
                     end if;
                 else
                     axi_in_state_nxt <= HOLD_FOR_PIPELINE;
                     msgin_ready <= '0';
+                    message_counter_target_nxt <= message_counter_target;
+                    message_counter_target_wr_ptr_nxt <= message_counter_target_wr_ptr;
+                    message_counter_in_nxt <= message_counter_in;
                 end if;
         end case;
     end process axi_in;
@@ -142,12 +169,12 @@ begin
     generic map(
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
-        c_pipeline_stages => c_pipeline_stages,
+        num_pipeline_stages => num_pipeline_stages,
         num_status_bits => num_status_bits
     )
     port map(
         CLK => clk,
-        RST => not reset_n,
+        RST_N => reset_n,
         
         --Input control signals to the blakeley stage module are outputs from the tb
         ILI => ilo,
@@ -168,22 +195,45 @@ begin
         rsm_status => rsa_status
     );
     
+    update_performance_counter : process(ili,clk_counter,performance_counter_state) is
+    begin
+        case(performance_counter_state) is
+            when COUNT =>
+                num_cycles_last_case_nxt <= num_cycles_last_case;
+                clk_counter_nxt <= clk_counter + 1;
+                if(ili = '1') then
+                    performance_counter_state <= SAVE;
+                else
+                    performance_counter_state <= COUNT;
+                end if;
+            when SAVE =>
+                num_cycles_last_case_nxt <= clk_counter;
+                clk_counter_nxt <= to_unsigned(0,16);
+                if(ili = '0') then
+                    performance_counter_state <= COUNT;
+                else
+                    performance_counter_state <= SAVE;
+                end if;
+        end case;
+    end process update_performance_counter;
+    
     --Iterface to AXI output stream
     axi_out : process(ili,axi_out_state,msgout_ready) is
-        variable message_counter_out : unsigned(log2_max_message_count-1 downto 0) := to_unsigned(0,log2_max_message_count);
-        variable message_counter_target_rd_ptr : integer := 0;
+        
     begin
         case(axi_out_state) is
             when WAIT_FOR_PIPELINE =>
                 --Signal to previous stage that axi_out is ready for new values
                 ipo <= '0';
                 msgout_valid <= '0';
-
+                msgout_last <= '0';
+                message_counter_target_rd_ptr_nxt <= message_counter_target_rd_ptr;
+                
                 if ili = '1' then
-                    message_counter_out := message_counter_out + 1;
+                    message_counter_out_nxt <= message_counter_out + 1;
                     axi_out_state_nxt <= GIVE_TO_AXI;
                 else
-                    message_counter_out := message_counter_out;
+                    message_counter_out_nxt <= message_counter_out;
                     axi_out_state_nxt <= WAIT_FOR_PIPELINE;
                 end if;
             when GIVE_TO_AXI =>
@@ -194,7 +244,9 @@ begin
                 else
                     msgout_last <= '0';
                 end if;
-                
+                message_counter_target_rd_ptr_nxt <= message_counter_target_rd_ptr;
+                message_counter_out_nxt <= message_counter_out;
+
                 if msgout_ready = '1' then
                     axi_out_state_nxt <= SIGNAL_PIPELINE;
                 else
@@ -205,9 +257,13 @@ begin
                 ipo <= '1';
                 msgout_valid <= '0';
                 msgout_last <= '0';
+                
                 if message_counter_out = message_counter_target(message_counter_target_rd_ptr) then
-                    message_counter_target_rd_ptr := inc_or_mod(message_counter_target_rd_ptr,c_pipeline_stages-1);
-                    message_counter_out := to_unsigned(0,log2_max_message_count);
+                    message_counter_target_rd_ptr_nxt <= circular_increment(message_counter_target_rd_ptr,num_pipeline_stages-1);
+                    message_counter_out_nxt <= to_unsigned(0,log2_max_message_count);
+                else
+                    message_counter_target_rd_ptr_nxt <= message_counter_target_rd_ptr;
+                    message_counter_out_nxt <= message_counter_out;
                 end if;
                 if ili = '0' then
                     axi_out_state_nxt <= WAIT_FOR_PIPELINE;
@@ -223,8 +279,14 @@ begin
             axi_in_state <= axi_in_state_nxt;
             axi_out_state <= axi_out_state_nxt;
             
-            --message_counter_in <= message_counter_in_nxt;
-            --message_counter_target <= message_counter_target_nxt;
+            message_counter_target <= message_counter_target_nxt;
+            message_counter_in <= message_counter_in_nxt;
+            message_counter_target_wr_ptr <= message_counter_target_wr_ptr_nxt;
+            message_counter_out <= message_counter_out_nxt;
+            message_counter_target_rd_ptr <= message_counter_target_rd_ptr_nxt;
+
+            num_cycles_last_case <= num_cycles_last_case_nxt;
+            clk_counter <= clk_counter_nxt;
         end if;
     end process fsm_seq;
 end rtl;

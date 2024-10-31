@@ -4,11 +4,11 @@ use IEEE.numeric_std.all;
 
 entity rsa_stage_module_control is
     generic(
-        c_block_size : integer := 256;
-        log2_c_block_size : integer := 8;
+        c_block_size : integer;
+        log2_c_block_size : integer;
         
-        c_pipeline_stages : integer;
-        num_status_bits : integer := 32;
+        num_pipeline_stages : integer;
+        num_status_bits : integer;
         
         control_offset : integer := 0;
         
@@ -31,10 +31,10 @@ entity rsa_stage_module_control is
     port(
         --Defaults
         clk : in std_logic;
-        rst : in std_logic;
+        rst_n : in std_logic;
 
         --Data signals
-        es : in std_logic_vector ((c_block_size/c_pipeline_stages)-1 downto 0);
+        es : in std_logic_vector ((c_block_size/num_pipeline_stages)-1 downto 0);
         
         --Control signals
         ili : in std_logic;
@@ -78,7 +78,7 @@ architecture rsa of rsa_stage_module_control is
     signal es_index : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
     signal es_index_nxt : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
     
-    constant es_size : integer := c_block_size/c_pipeline_stages;
+    constant es_size : integer := c_block_size/num_pipeline_stages;
 
 begin
     control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
@@ -324,14 +324,14 @@ begin
         end case;
     end process fsm_comb;
     
-    fsm_seq : process(clk,rst) is
+    fsm_seq : process(clk,rst_n) is
     begin
         if(clk'event and clk = '1') then
             stage_state <= stage_state_nxt;
             blakeley_module_state <= blakeley_module_state_nxt;
             es_index <= es_index_nxt;
         end if;
-        if rst = '1' then
+        if rst_n = '0' then
             stage_state <= IDLE;
             blakeley_module_state <= INIT;
             es_index <= to_unsigned(0,log2_c_block_size);

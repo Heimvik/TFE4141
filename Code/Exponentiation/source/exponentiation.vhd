@@ -1,161 +1,96 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 
-entity exponentiation is
-	generic (
-        c_block_size : integer  := 256;
-        log2_c_block_size : integer := 8;
-        c_pipeline_stages : integer := 16;
-        num_status_bits : integer := 32
+entity rsa_core_pipeline is
+    generic (
+		-- Users to add parameters here
+		c_block_size          : integer := 256;
+		log2_c_block_size     : integer := 8;
+		
+		c_pipeline_stages     : integer := 16;
+		
+		num_status_bits       : integer := 32
 	);
-	port (
-		--input controll
-		valid_in	: in STD_LOGIC;
-		ready_in	: out STD_LOGIC;
-
-		--input data
-		message 	: in STD_LOGIC_VECTOR ( C_block_size-1 downto 0 );
-		key 		: in STD_LOGIC_VECTOR ( C_block_size-1 downto 0 );
-
-		--ouput controll
-		ready_out	: in STD_LOGIC;
-		valid_out	: out STD_LOGIC;
-
-		--output data
-		result 		: out STD_LOGIC_VECTOR(C_block_size-1 downto 0);
-
-		--modulus
-		modulus 	: in STD_LOGIC_VECTOR(C_block_size-1 downto 0);
-
-		--utility
-		clk 		: in STD_LOGIC;
-		reset_n 	: in STD_LOGIC
-	);
-end exponentiation;
-
-
-architecture expBehave of exponentiation is
-    --Control signals             
-    signal ili : std_logic;
-    signal ipi : std_logic;
-    signal ipo : std_logic := '0';
-    signal ilo : std_logic := '0';
-    
-    --Status registers
-    signal rsm_status : std_logic_vector(num_status_bits-1 downto 0);
-    signal bm_status : std_logic_vector(num_status_bits-1 downto 0);
-    
-    --States
-    type ai_state is (GET_FROM_AXI,HOLD_FOR_PIPELINE);
-    type ao_state is (WAIT_FOR_PIPELINE,GIVE_TO_AXI,SIGNAL_PIPELINE);
-    signal axi_in_state : ai_state := GET_FROM_AXI;
-    signal axi_in_state_nxt : ai_state := GET_FROM_AXI;
-    signal axi_out_state : ao_state := WAIT_FOR_PIPELINE;
-    signal axi_out_state_nxt : ao_state := WAIT_FOR_PIPELINE;
-begin
-    --Iterface to AXI input stream
-    axi_in : process(ipi,axi_in_state,valid_in) is
-    begin
-        case axi_in_state is
-            when GET_FROM_AXI =>
-                --Signal to next stage that axi_in is entering IDLE and is open for new data
-                ilo <= '0';
-                ready_in <= '0';
-                                
-                --Enter hold state for next stage if it is ready for new values (ipi = '0') and data in is valid (valid_in = '1')
-                if ipi = '0' and valid_in = '1' then
-                    axi_in_state_nxt <= HOLD_FOR_PIPELINE;
-                else
-                    axi_in_state_nxt <= GET_FROM_AXI;
-                end if;
-            
-            when HOLD_FOR_PIPELINE =>
-                --Signal to next stage that data is valid
-                ilo <= '1';
-                
-                --Enter GET_FROM_AXI state for axi_in only if next stage has taken over the values on the axi_in bus
-                if(ipi = '1') then
-                    axi_in_state_nxt <= GET_FROM_AXI;
-                    ready_in <= '1';
-                else
-                    axi_in_state_nxt <= HOLD_FOR_PIPELINE;
-                    ready_in <= '0';
-                end if;
-        end case;
-    end process axi_in;
-
-    rsa_pipeline : entity work.rsa_core_pipeline
-    generic map(
-        c_block_size => c_block_size,
-        log2_c_block_size => log2_c_block_size,
-        c_pipeline_stages => c_pipeline_stages,
-        num_status_bits => num_status_bits
-    )
-    port map(
-        CLK => clk,
-        RST => reset_n,
+    port (
+        CLK : in std_logic;
+        RST : in std_logic;
         
-        --Input control signals to the blakeley stage module are outputs from the tb
-        ILI => ilo,
-        IPI => ipo,
+        --Control signals             
+        ILI : in std_logic;
+        IPI : in std_logic;
+        IPO : out std_logic;
+        ILO : out std_logic;
+        N : in std_logic_vector (c_block_size-1 downto 0);
+        E : in std_logic_vector (c_block_size-1 downto 0);
         
-        --Output control signals from the blakeley stage module are inputs to the tb
-        IPO => ipi,
-        ILO => ili,
+        --Data signals
+        DPO : out std_logic_vector (c_block_size-1 downto 0);
+        DCO : out std_logic_vector (c_block_size-1 downto 0);
+        DPI : in std_logic_vector (c_block_size-1 downto 0);
+        DCI : in std_logic_vector (c_block_size-1 downto 0);
         
-        N => modulus,
-        E => key,
-        
-        DPI => message,
-        DCI => std_logic_vector(to_unsigned(1, c_block_size)),
-        DPO => open,
-        DCO => result,
-        
-        rsm_status => rsm_status
+        --Status registers
+        rsm_status : out std_logic_vector(num_status_bits-1 downto 0);
+        bm_status : out std_logic_vector(num_status_bits-1 downto 0)
     );
-    
-    --Iterface to AXI output stream
-    axi_out : process(ili,axi_out_state,ready_out) is
-    begin
-        case(axi_out_state) is
-            when WAIT_FOR_PIPELINE =>
-                --Signal to previous stage that axi_out is ready for new values
-                ipo <= '0';
-                valid_out <= '0';
+end rsa_core_pipeline;
 
-                if ili = '1' then
-                    axi_out_state_nxt <= GIVE_TO_AXI;
-                else
-                    axi_out_state_nxt <= WAIT_FOR_PIPELINE;
-                end if;
-            
-            when GIVE_TO_AXI =>
-                ipo <= '0';
-                valid_out <= '1';
-                
-                if ready_out = '1' then
-                    axi_out_state_nxt <= SIGNAL_PIPELINE;
-                else
-                    axi_out_state_nxt <= GIVE_TO_AXI;
-                end if;
-                
-            when SIGNAL_PIPELINE =>
-                ipo <= '1';
-                valid_out <= '0';
-                if ili = '0' then
-                    axi_out_state_nxt <= WAIT_FOR_PIPELINE;
-                else
-                    axi_out_state_nxt <= SIGNAL_PIPELINE;
-                end if;
-        end case;
-    end process axi_out;
+architecture rtl of rsa_core_pipeline is
+    --Intermediate signals in the pipeline
+    --First index i gives intermediates between stage i and i+1
+    signal ilx_internals : std_logic_vector(c_pipeline_stages downto 0);
+    signal ipx_internals : std_logic_vector(c_pipeline_stages downto 0);
+
+    -- Signals for DPO, DCO, etc.
+    type data_internals is array (c_pipeline_stages+1 downto 0) of std_logic_vector(c_block_size-1 downto 0);
+    signal dcx_internals : data_internals;
+    signal dpx_internals : data_internals;
     
-    fsm_seq : process(clk) is
-    begin
-        if (clk'event and clk='1') then
-            axi_in_state <= axi_in_state_nxt;
-            axi_out_state <= axi_out_state_nxt;
-        end if;
-    end process fsm_seq;
-end expBehave;
+    type status_internals is array (c_pipeline_stages downto 1) of std_logic_vector(num_status_bits-1 downto 0);
+    signal rsm_status_internals : status_internals;
+    signal bm_status_internals : status_internals;
+
+    constant es_size : integer := c_block_size/c_pipeline_stages;
+begin
+    rsm_status <= ilx_internals(c_pipeline_stages downto 1) & ipx_internals(c_pipeline_stages downto 1);
+
+    ilx_internals(0) <= ILI; 
+    IPO <= ipx_internals(0);
+    
+    dcx_internals(0) <= DCI;
+    dpx_internals(0) <= DPI;
+
+    gen_pipeline : for i in 1 to c_pipeline_stages generate
+        stage : entity work.rsa_stage_module
+        generic map(
+            c_block_size => c_block_size,
+            log2_c_block_size => log2_c_block_size,
+            c_pipeline_stages => c_pipeline_stages,
+            num_status_bits => num_status_bits
+        )
+        port map(
+            CLK => CLK,
+            RST => RST,
+            ILI => ilx_internals(i-1),
+            IPO => ipx_internals(i-1),
+            ILO => ilx_internals(i),
+            IPI => ipx_internals(i),
+            
+            N => n,
+            ES => e((es_size*i)-1 downto (es_size*(i-1))),
+            DCI => dcx_internals(i-1),
+            DPI => dpx_internals(i-1),
+            DCO => dcx_internals(i),
+            DPO => dpx_internals(i),
+            rsm_status => rsm_status_internals(i),
+            bm_status => bm_status_internals(i)
+        );
+    end generate gen_pipeline;
+    
+    ipx_internals(c_pipeline_stages) <= IPI;
+    ILO <= ilx_internals(c_pipeline_stages);
+
+    DCO <= dcx_internals(c_pipeline_stages);
+    DPO <= dcx_internals(c_pipeline_stages);
+    
+end rtl;

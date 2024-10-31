@@ -85,6 +85,16 @@ architecture rtl of rsa_msgin is
 
 	signal s_axis_accept        : std_logic;
 	signal s_axis_tready_i      : std_logic;
+	
+	function all_bits_one(input_vector : std_logic_vector(MSG_BUFLEN-1 downto 0)) return std_logic is
+    begin
+        for i in input_vector'range loop
+            if input_vector(i) /= '1' then
+                return '0';
+            end if;
+        end loop;
+        return '1';
+    end function;
 begin
 	-- I/O Connections assignments
 
@@ -189,7 +199,7 @@ begin
 	S_AXIS_TREADY   <= s_axis_tready_i;
 	s_axis_accept   <= s_axis_tready_i and S_AXIS_TVALID;
 
-	msgin_valid_i   <= and msgbuf_slot_valid_r;  -- And all bits together (VHDL 2008)
+	msgin_valid_i   <= all_bits_one(msgbuf_slot_valid_r);  -- And all bits together (VHDL 2008)
 	msgin_accept    <= msgin_ready and msgin_valid_i;
 	msgin_valid     <= msgin_valid_i;
 	msgin_last      <= msgbuf_last_r;

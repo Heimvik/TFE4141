@@ -72,8 +72,8 @@ architecture rsa of rsa_stage_module_control is
     signal blakeley_module_state : bm_state := INIT;
     signal blakeley_module_state_nxt : bm_state := INIT;
     
-    signal ilo_internal : std_logic;
-    signal ipo_internal : std_logic;
+    signal ilo_internal : std_logic := '0';
+    signal ipo_internal : std_logic := '0';
     
     signal es_index : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
     signal es_index_nxt : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);

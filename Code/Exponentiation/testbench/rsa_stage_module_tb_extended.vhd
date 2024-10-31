@@ -6,7 +6,7 @@ use ieee.std_logic_textio.all;
 
 use work.tb_utils.all;
 
-entity rsa_stage_module_tb_extended is
+entity rsa_pipeline_tb is
     generic(
         c_block_size : integer := 256;
         log2_c_block_size : integer := 8;
@@ -14,9 +14,9 @@ entity rsa_stage_module_tb_extended is
         num_status_bits : integer := 32;
         CLK_PERIOD : time := 1 ns        
     );
-end rsa_stage_module_tb_extended;
+end rsa_pipeline_tb;
 
-architecture rtl of rsa_stage_module_tb_extended is    
+architecture rtl of rsa_pipeline_tb is    
     signal clk : std_logic;
     signal rst : std_logic;
     
@@ -34,13 +34,12 @@ architecture rtl of rsa_stage_module_tb_extended is
     
     --Status registers
     signal rsm_status : std_logic_vector(num_status_bits-1 downto 0);
-    signal bm_status : std_logic_vector(num_status_bits-1 downto 0);
     
     --Init values
     signal n : std_logic_vector (c_block_size-1 downto 0);
     signal e : std_logic_vector (c_block_size-1 downto 0);
     
-    type ai_state is (GET_FROM_AXI,HOLD_FOR_PIPELINE,FINISHED_IN); --Finished are only here in tb
+    type ai_state is (GET_FROM_AXI,HOLD_FOR_PIPELINE,FINISHED_IN,PULSE_RST); --Finished are only here in tb
     type ao_state is (WAIT_FOR_PIPELINE,GIVE_TO_AXI,FINISHED_OUT); --Finished are only here in tb
     signal axi_in_state : ai_state := GET_FROM_AXI;
     signal axi_in_state_nxt : ai_state := GET_FROM_AXI;
@@ -53,6 +52,20 @@ architecture rtl of rsa_stage_module_tb_extended is
     signal correct_c : c_array;
     shared variable cases_in_count : integer := 1;
     shared variable cases_out_count : integer := 1;
+    shared variable cases_out_count_prev : integer := 0;
+    
+    shared variable rst_at_case : std_logic_vector(num_testcases downto 1) := (others => '0');
+
+    function count_ones(vec : std_logic_vector) return integer is
+        variable count : integer := 0;
+    begin
+        for i in vec'RANGE loop
+            if vec(i) = '1' then
+                count := count + 1;
+            end if;
+        end loop;
+        return count;
+    end function;
     
 begin
     clk_gen : process is
@@ -64,6 +77,7 @@ begin
             wait for CLK_PERIOD/2;
         end loop;
     end process clk_gen;
+
     
     DUT : entity work.rsa_core_pipeline
     generic map(
@@ -92,8 +106,7 @@ begin
         DPO => dpi,
         DCO => dci,
         
-        rsm_status => rsm_status,
-        bm_status => bm_status
+        rsm_status => rsm_status
     );
     
     axi_regio : process is
@@ -118,7 +131,6 @@ begin
     
     axi_in : process(ipi,axi_in_state) is
         variable current_case_m, current_case_correct_c: std_logic_vector(c_block_size-1 downto 0);
-        
         variable cases_in_count_prev : integer := 0;
         variable file_opened : boolean := false;
         file csv_file : text;
@@ -128,6 +140,7 @@ begin
         case axi_in_state is
             when GET_FROM_AXI =>
                 ilo <= '0';
+                rst <= '0';
                 
                 if not file_opened then
                     file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester 7\TFE4141 DDS1\Project\Utilities\messages.csv",READ_MODE);
@@ -157,6 +170,9 @@ begin
             when HOLD_FOR_PIPELINE =>
             
                 ilo <= '1';
+                if(cases_in_count = 25 and rst_at_case(cases_in_count) = '0') then
+                    axi_in_state_nxt <= PULSE_RST;
+                end if;
                 if(ipi = '1') then
                     cases_in_count := cases_in_count + 1;
                     axi_in_state_nxt <= GET_FROM_AXI;
@@ -166,8 +182,16 @@ begin
                 report "AXI_IN finished!"
                 severity note;
                 
-            when others =>
-        
+            when PULSE_RST =>
+                rst <= '1';
+                --The rst causes a flush of the pipeline, effectively discarding all that lies in it
+                cases_out_count := cases_out_count + c_pipeline_stages;
+                cases_out_count_prev := cases_out_count_prev + c_pipeline_stages;
+                rst_at_case(cases_in_count) := '1';
+                report "RST"
+                severity note;
+                axi_in_state_nxt <= GET_FROM_AXI;        
+                
         end case;
     end process axi_in;
     
@@ -175,7 +199,6 @@ begin
         variable pass_count : integer := 0;
         variable fail_count : integer := 0;
         
-        variable cases_out_count_prev : integer := 0;
     begin
         case(axi_out_state) is
             when WAIT_FOR_PIPELINE =>

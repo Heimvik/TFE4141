@@ -1,177 +1,347 @@
-library ieee;
-use ieee.std_logic_1164.all;
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.numeric_std.all;
 
-entity exponentiation is
-	generic (
-        c_block_size : integer  := 256;
+entity rsa_stage_module_control is
+    generic(
+        c_block_size : integer := 256;
         log2_c_block_size : integer := 8;
-        c_pipeline_stages : integer := 16;
-        num_status_bits : integer := 32
-	);
-	port (
-		--input controll
-		valid_in	: in STD_LOGIC;
-		ready_in	: out STD_LOGIC;
-
-		--input data
-		message 	: in STD_LOGIC_VECTOR ( C_block_size-1 downto 0 );
-		key 		: in STD_LOGIC_VECTOR ( C_block_size-1 downto 0 );
-
-		--ouput controll
-		ready_out	: in STD_LOGIC;
-		valid_out	: out STD_LOGIC;
-
-		--output data
-		result 		: out STD_LOGIC_VECTOR(C_block_size-1 downto 0);
-
-		--modulus
-		modulus 	: in STD_LOGIC_VECTOR(C_block_size-1 downto 0);
-
-		--utility
-		clk 		: in STD_LOGIC;
-		reset_n 	: in STD_LOGIC
-	);
-end exponentiation;
-
-
-architecture expBehave of exponentiation is
-    --Control signals             
-    signal ili : std_logic;
-    signal ipi : std_logic;
-    signal ipo : std_logic := '0';
-    signal ilo : std_logic := '0';
-    
-    --Data signals
-    signal dpo : std_logic_vector (c_block_size-1 downto 0);
-    signal dco : std_logic_vector (c_block_size-1 downto 0);
-    signal dpi : std_logic_vector (c_block_size-1 downto 0);
-    signal dci : std_logic_vector (c_block_size-1 downto 0);
-    
-    --Status registers
-    signal rsm_status : std_logic_vector(num_status_bits-1 downto 0);
-    signal bm_status : std_logic_vector(num_status_bits-1 downto 0);
-begin    
-    DUT : entity work.rsa_core_pipeline
-    generic map(
-        c_block_size => c_block_size,
-        log2_c_block_size => log2_c_block_size,
-        c_pipeline_stages => c_pipeline_stages,
-        num_status_bits => num_status_bits
-    )
-    port map(
-        CLK => clk,
-        RST => reset_n,
         
-        --Input control signals to the blakeley stage module are outputs from the tb
-        ILI => ilo,
-        IPI => ipo,
+        c_pipeline_stages : integer;
+        num_status_bits : integer := 32;
         
-        --Output control signals from the blakeley stage module are inputs to the tb
-        IPO => ipi,
-        ILO => ili,
+        control_offset : integer := 0;
         
-        N => modulus,
-        E => key,
+        ili_bit : integer := 0;
+        ipi_bit : integer := 1;
+        ilo_bit : integer := 2;
+        ipo_bit : integer := 3;
+        c_bm_rval_bit : integer := 4;
+        p_bm_rval_bit : integer := 5;
         
-        DPI => dpo,
-        DCI => dco,
-        DPO => dpi,
-        DCO => dci,
+        s_state_size : integer := 3;
+        s_state_offset : integer := 6;
         
-        rsm_status => rsm_status,
-        bm_status => bm_status
+        bm_state_size : integer := 2;
+        bm_state_offset : integer := 9;
+        
+        es_index_offset : integer := 11
+        
     );
-    
-    axi_regio : process is
-        
-    begin
-       
-    end process axi_regio;
-    
-    axi_in : process(ipi,axi_in_state) is
+    port(
+        --Defaults
+        clk : in std_logic;
+        rst : in std_logic;
 
-    begin
-        case axi_in_state is
-            when GET_FROM_AXI =>
-                ilo <= '0';
-                
-                dco <= std_logic_vector(to_unsigned(1, c_block_size));
-                dpo <= current_case_m;
-                correct_c(cases_in_count) <= current_case_correct_c;
-                
-                if ipi = '0' then
-                    axi_in_state_nxt <= HOLD_FOR_PIPELINE;
-                end if;
-            
-            when HOLD_FOR_PIPELINE =>
-            
-                ilo <= '1';
-                if(ipi = '1') then
-                    cases_in_count := cases_in_count + 1;
-                    axi_in_state_nxt <= GET_FROM_AXI;
-                end if;
-            when FINISHED_IN =>
-                file_close(csv_file);
-                report "AXI_IN finished!"
-                severity note;
-                
-            when others =>
+        --Data signals
+        es : in std_logic_vector ((c_block_size/c_pipeline_stages)-1 downto 0);
         
-        end case;
-    end process axi_in;
+        --Control signals
+        ili : in std_logic;
+        ipi : in std_logic;
+        ilo : out std_logic;
+        ipo : out std_logic;
+        
+        c_mux_ctl : out std_logic;
+        p_mux_ctl : out std_logic;
+        
+        c_reg_clk_en : out std_logic;
+        c_reg_rst : out std_logic;
+        p_reg_clk_en : out std_logic; 
+        p_reg_rst : out std_logic;
+        
+        c_bm_abval : out std_logic;
+        c_bm_rval : in std_logic;
+        p_bm_abval : out std_logic;
+        p_bm_rval : in std_logic;
+
+        
+        rst_bms : out std_logic;
+        
+        --Status signals 
+        control_status : out std_logic_vector(num_status_bits-1 downto 0) := (others=>'0')
+    );
+end rsa_stage_module_control;
+
+architecture rsa of rsa_stage_module_control is
+    type s_state is (IDLE,SAVE_IN,ACK_SAVE_IN,RUN_BM,HOLD_OUT);
+    type bm_state is (INIT,CP_FINISHED,P_FINISHED);
     
-    axi_out : process(ili,axi_out_state) is
-        variable pass_count : integer := 0;
-        variable fail_count : integer := 0;
-        
-        variable cases_out_count_prev : integer := 0;
+    signal stage_state : s_state := IDLE;
+    signal stage_state_nxt : s_state := IDLE;
+    signal blakeley_module_state : bm_state := INIT;
+    signal blakeley_module_state_nxt : bm_state := INIT;
+    
+    signal ilo_internal : std_logic := '0';
+    signal ipo_internal : std_logic := '0';
+    
+    signal es_index : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
+    signal es_index_nxt : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
+    
+    constant es_size : integer := c_block_size/c_pipeline_stages;
+
+begin
+    control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
+    control_status(control_offset+ipo_bit downto control_offset+ilo_bit) <= ipo_internal & ilo_internal;
+    control_status(control_offset+p_bm_rval_bit downto control_offset+c_bm_rval_bit) <= p_bm_rval & c_bm_rval;
+    control_status(control_offset+es_index_offset+log2_c_block_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
+    ilo <= ilo_internal;
+    ipo <= ipo_internal;
+    
+    fsm_comb : process(stage_state,blakeley_module_state,ili,es,c_bm_rval,p_bm_rval,ipi) is
     begin
-        case(axi_out_state) is
-            when WAIT_FOR_PIPELINE =>
-                ipo <= '0';
+        case(stage_state) is
+            when IDLE =>
+                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "000";
+                ilo_internal <= '0';
+                ipo_internal <= '0';
+                
+                c_mux_ctl <= '0';
+                p_mux_ctl <= '0';
+                
+                c_bm_abval <= '0';
+                p_bm_abval <= '0';
+                
+                c_reg_clk_en <= '0';
+                p_reg_clk_en <= '0';
+                
+                blakeley_module_state_nxt <= INIT;
+                es_index_nxt <= es_index;
+                
                 if ili = '1' then
-                    axi_out_state_nxt <= GIVE_TO_AXI;
+                    c_reg_rst <= '1';
+                    p_reg_rst <= '1';
+                    stage_state_nxt <= SAVE_IN;
+                else
+                    c_reg_rst <= '0';
+                    p_reg_rst <= '0';
+                    stage_state_nxt <= IDLE;
+                end if;
+                
+            when SAVE_IN =>
+                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "001";
+                ilo_internal <= '0';
+                ipo_internal <= '0';
+                
+                c_mux_ctl <= '0';
+                p_mux_ctl <= '0';
+                
+                c_bm_abval <= '0';
+                p_bm_abval <= '0';
+                
+                --Watch the hold time here!
+                c_reg_clk_en <= '1';
+                p_reg_clk_en <= '1';
+                
+                c_reg_rst <= '0';
+                p_reg_rst <= '0';
+                
+                blakeley_module_state_nxt <= INIT;
+                es_index_nxt <= es_index;
+                stage_state_nxt <= ACK_SAVE_IN;
+                
+            when ACK_SAVE_IN =>
+                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "010";
+                --Ack for the values you popped off
+                ilo_internal <= '0';
+                ipo_internal <= '1';
+                
+                c_mux_ctl <= '1';
+                p_mux_ctl <= '1';
+                
+                c_bm_abval <= '0';
+                p_bm_abval <= '0';
+                
+                c_reg_clk_en <= '0';
+                p_reg_clk_en <= '0';
+                
+                c_reg_rst <= '0';
+                p_reg_rst <= '0';
+                
+                blakeley_module_state_nxt <= INIT;
+                es_index_nxt <= es_index;
+                --To ensure that previous stage has returned to idle, such that coming around again before the previous stage won't pick up the same value
+                if ili = '0' then
+                    stage_state_nxt <= RUN_BM;
+                else
+                    stage_state_nxt <= ACK_SAVE_IN;
                 end if;
             
-            when GIVE_TO_AXI =>
-                --DCI ready and can be sent to axi for as ling as ipo = '0'
-                if cases_out_count /= cases_out_count_prev then
-                    if vectors_equal(dci,correct_c(cases_out_count)) then
-                        pass_count := pass_count + 1;
-                        report "OK: Case " & integer'image(cases_out_count) & " passed!"
-                        severity note;
-                    else
-                        fail_count := fail_count + 1;
-                        report "FAIL: Case " & integer'image(cases_out_count) & " failed"
-                        severity note;
-                    end if;
-                    cases_out_count_prev := cases_out_count;
-                end if;
+            when RUN_BM =>
+                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "011";
                 
-                if cases_out_count = cases_in_count then
-                    axi_out_state_nxt <= FINISHED_OUT;
-                end if;
-    
-                ipo <= '1';
-                if ili = '0' then
-                    cases_out_count := cases_out_count + 1;
-                    axi_out_state_nxt <= WAIT_FOR_PIPELINE;                
-                end if;
+                ilo_internal <= '0';
+                ipo_internal <= '0';
                 
-            when FINISHED_OUT =>
-                report " " severity note;  -- Add a blank line before
-                report "Test summary: " & integer'image(pass_count) & " cases passed, " & integer'image(fail_count) & " cases failed." severity note; 
-                report " " severity note;  -- Add a blank line after
+                c_mux_ctl <= '1';
+                p_mux_ctl <= '1';
                 
+                c_reg_rst <= '0';
+                p_reg_rst <= '0';
+                
+                
+                case(blakeley_module_state) is
+                    when INIT =>
+                        control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
+                        
+                        p_bm_abval <= '1';                        
+                        stage_state_nxt <= RUN_BM;
+                        es_index_nxt <= es_index;
+                        
+                        if es(to_integer(es_index)) = '1' then
+                            c_bm_abval <= '1';
+                            if c_bm_rval = '1' and p_bm_rval = '1' then
+                                --NB: The hold time when entering CP_FINISHED might be to small for clocking in results!
+                                c_reg_clk_en <= '1';
+                                p_reg_clk_en <= '1';
+                                blakeley_module_state_nxt <= CP_FINISHED;
+                            else
+                                c_reg_clk_en <= '0';
+                                p_reg_clk_en <= '0';
+                                blakeley_module_state_nxt <= INIT;
+                            end if;
+                        else
+                            --NB: This can be utilized better (it uses only one blakeley module when es index not present
+                            c_bm_abval <= '0';
+                            if p_bm_rval = '1' then
+                                c_reg_clk_en <= '0';
+                                p_reg_clk_en <= '1';
+                                blakeley_module_state_nxt <= P_FINISHED;
+                            else
+                                c_reg_clk_en <= '0';
+                                p_reg_clk_en <= '0';
+                                blakeley_module_state_nxt <= INIT;
+                            end if;
+                        end if;
+                    when CP_FINISHED =>
+                        control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "01";
+          
+                        c_reg_clk_en <= '0';
+                        p_reg_clk_en <= '0';
+                                        
+                        --Negate ABVAL
+                        c_bm_abval <= '0';
+                        p_bm_abval <= '0';
+                        
+                        --Wait for RVAL negation
+                        if c_bm_rval = '0' and p_bm_rval = '0' then
+                            blakeley_module_state_nxt <= INIT;
+                            if es_index = to_unsigned(es_size-1,log2_c_block_size) then
+                                es_index_nxt <= to_unsigned(0,log2_c_block_size);
+                                stage_state_nxt <= HOLD_OUT;
+                            else
+                                es_index_nxt <= es_index + 1;
+                                stage_state_nxt <= RUN_BM;
+                            end if;
+                        else
+                            blakeley_module_state_nxt <= CP_FINISHED;
+                            es_index_nxt <= es_index;
+                            stage_state_nxt <= RUN_BM;
+                        end if;
+                    when P_FINISHED =>
+                        control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "10";
+
+                        c_reg_clk_en <= '0';
+                        p_reg_clk_en <= '0';
+                        
+                        --Negate ABVAL
+                        c_bm_abval <= '0';
+                        p_bm_abval <= '0';
+                        
+                        --Wait for RVAL negation
+                        if p_bm_rval = '0' then
+                            blakeley_module_state_nxt <= INIT;
+                            if es_index = to_unsigned(es_size-1,log2_c_block_size) then
+                                es_index_nxt <= to_unsigned(0,log2_c_block_size);
+                                stage_state_nxt <= HOLD_OUT;
+                            else
+                                es_index_nxt <= es_index + 1;
+                                stage_state_nxt <= RUN_BM;
+                            end if;
+                        else
+                            blakeley_module_state_nxt <= CP_FINISHED;
+                            es_index_nxt <= es_index;
+                            stage_state_nxt <= RUN_BM;
+                        end if;
+                    when others=>
+                        control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "11";
+                        c_reg_clk_en <= '0';
+                        p_reg_clk_en <= '0';
+                                        
+                        c_bm_abval <= '0';
+                        p_bm_abval <= '0';
+                        
+                        blakeley_module_state_nxt <= INIT;
+                        es_index_nxt <= es_index;
+                        stage_state_nxt <= RUN_BM;
+                end case;
+            when HOLD_OUT =>
+                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "100";
+                ilo_internal <= '1';
+                ipo_internal <= '0';
+                
+                c_mux_ctl <= '1';
+                p_mux_ctl <= '1';
+                
+                c_bm_abval <= '0';
+                p_bm_abval <= '0';
+                
+                c_reg_clk_en <= '0';
+                p_reg_clk_en <= '0';
+                
+                c_reg_rst <= '0';
+                p_reg_rst <= '0';
+                
+                blakeley_module_state_nxt <= INIT;
+                es_index_nxt <= es_index;
+                if ipi = '1' then
+                    stage_state_nxt <= IDLE;
+                else
+                    stage_state_nxt <= HOLD_OUT;
+                end if;
             when others =>
+                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "111";
+                control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "11";
+                
+                ilo_internal <= '0';
+                ipo_internal <= '0';
+                
+                c_mux_ctl <= '0';
+                p_mux_ctl <= '0';
+                
+                c_bm_abval <= '0';
+                p_bm_abval <= '0';
+                
+                c_reg_clk_en <= '0';
+                p_reg_clk_en <= '0';
+                
+                c_reg_rst <= '0';
+                p_reg_rst <= '0';
+                
+                blakeley_module_state_nxt <= INIT;
+                es_index_nxt <= es_index;
+                stage_state_nxt <= IDLE;
         end case;
-    end process axi_out;
+    end process fsm_comb;
     
-    fsm_seq : process(clk) is
+    fsm_seq : process(clk,rst) is
     begin
-        if (clk'event and clk='1') then
-            axi_in_state <= axi_in_state_nxt;
-            axi_out_state <= axi_out_state_nxt;
+        if(clk'event and clk = '1') then
+            stage_state <= stage_state_nxt;
+            blakeley_module_state <= blakeley_module_state_nxt;
+            es_index <= es_index_nxt;
+        end if;
+        if rst = '1' then
+            stage_state <= IDLE;
+            rst_bms <= '1';
+        else
+            rst_bms <= '0';
         end if;
     end process fsm_seq;
-end expBehave;
+end architecture rsa;
+                
+                
+                
+                
+                
+                

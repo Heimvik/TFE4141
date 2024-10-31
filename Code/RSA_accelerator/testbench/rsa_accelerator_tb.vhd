@@ -26,7 +26,7 @@ architecture struct of rsa_accelerator_tb is
 
 	-- RENAME this constant to "long_test" for more comprehensive tests
 	-- "short_test" for shorter tests
-	constant C_TESTCASE_FOLDER: string := "long_test";
+	constant C_TESTCASE_FOLDER: string := "C:\Users\cmhei\OneDrive\Dokumenter\Semester 7\TFE4141 DDS1\Project\Code\RSA_accelerator\testbench\rsa_tests\long_tests";
 
 	-----------------------------------------------------------------------------
 	-- Clocks and reset
@@ -81,17 +81,17 @@ architecture struct of rsa_accelerator_tb is
 	procedure open_tc_inp(testcase_id: in integer) is
 	begin
 		if(testcase_id=0)then
-			file_open(tc_inp, C_TESTCASE_FOLDER & ".inp_messages.hex_pt0_in.txt", read_mode);
+			file_open(tc_inp, C_TESTCASE_FOLDER & "\inp_messages\long_test.inp_messages.hex_pt0_in.txt", read_mode);
 		elsif(testcase_id=1)then
-			file_open(tc_inp, C_TESTCASE_FOLDER & ".inp_messages.hex_pt1_in.txt", read_mode);
+			file_open(tc_inp, C_TESTCASE_FOLDER & "\inp_messages\long_test.inp_messages.hex_pt1_in.txt", read_mode);
 		elsif(testcase_id=2)then
-			file_open(tc_inp, C_TESTCASE_FOLDER & ".inp_messages.hex_pt2_in.txt", read_mode);
+			file_open(tc_inp, C_TESTCASE_FOLDER & "\inp_messages\long_test.inp_messages.hex_pt2_in.txt", read_mode);
 		elsif(testcase_id=3)then
-			file_open(tc_inp, C_TESTCASE_FOLDER & ".inp_messages.hex_ct3_in.txt", read_mode);
+			file_open(tc_inp, C_TESTCASE_FOLDER & "\inp_messages\long_test.inp_messages.hex_ct3_in.txt", read_mode);
 		elsif(testcase_id=4)then
-			file_open(tc_inp, C_TESTCASE_FOLDER & ".inp_messages.hex_ct4_in.txt", read_mode);
+			file_open(tc_inp, C_TESTCASE_FOLDER & "\inp_messages\long_test.inp_messages.hex_ct4_in.txt", read_mode);
 		elsif(testcase_id=5)then
-			file_open(tc_inp, C_TESTCASE_FOLDER & ".inp_messages.hex_ct5_in.txt", read_mode);
+			file_open(tc_inp, C_TESTCASE_FOLDER & "\inp_messages\long_test.inp_messages.hex_ct5_in.txt", read_mode);
 		end if;
 	end open_tc_inp;
 
@@ -101,17 +101,17 @@ architecture struct of rsa_accelerator_tb is
 	procedure open_tc_otp(testcase_id: in integer) is
 	begin
 		if(testcase_id=0)then
-			file_open(tc_otp, C_TESTCASE_FOLDER & ".otp_messages.hex_ct0_out.txt", read_mode);
+			file_open(tc_otp, C_TESTCASE_FOLDER & "\otp_messages\long_test.otp_messages.hex_ct0_out.txt", read_mode);
 		elsif(testcase_id=1)then
-			file_open(tc_otp, C_TESTCASE_FOLDER & ".otp_messages.hex_ct1_out.txt", read_mode);
+			file_open(tc_otp, C_TESTCASE_FOLDER & "\otp_messages\long_test.otp_messages.hex_ct1_out.txt", read_mode);
 		elsif(testcase_id=2)then
-			file_open(tc_otp, C_TESTCASE_FOLDER & ".otp_messages.hex_ct2_out.txt", read_mode);
+			file_open(tc_otp, C_TESTCASE_FOLDER & "\otp_messages\long_test.otp_messages.hex_ct2_out.txt", read_mode);
 		elsif(testcase_id=3)then
-			file_open(tc_otp, C_TESTCASE_FOLDER & ".otp_messages.hex_pt3_out.txt", read_mode);
+			file_open(tc_otp, C_TESTCASE_FOLDER & "\otp_messages\long_test.otp_messages.hex_pt3_out.txt", read_mode);
 		elsif(testcase_id=4)then
-			file_open(tc_otp, C_TESTCASE_FOLDER & ".otp_messages.hex_pt4_out.txt", read_mode);
+			file_open(tc_otp, C_TESTCASE_FOLDER & "\otp_messages\long_test.otp_messages.hex_pt4_out.txt", read_mode);
 		elsif(testcase_id=5)then
-			file_open(tc_otp, C_TESTCASE_FOLDER & ".otp_messages.hex_pt5_out.txt", read_mode);
+			file_open(tc_otp, C_TESTCASE_FOLDER & "\otp_messages\long_test.otp_messages.hex_pt5_out.txt", read_mode);
 		end if;
 	end open_tc_otp;
 
@@ -313,9 +313,9 @@ begin
 	clk_gen: process is
 	begin
 		clk <= '1';
-		wait for 6 ns;
+		wait for 0.5 ns; --prev 6 ns
 		clk <= '0';
-		wait for 6 ns;
+		wait for 0.5 ns; --prev 6 ns
 	end process;
 
 	-- reset_n generator

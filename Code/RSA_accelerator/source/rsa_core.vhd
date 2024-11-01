@@ -79,9 +79,7 @@ architecture rtl of rsa_core is
     type pc_state is (COUNT,SAVE);
     signal performance_counter_state : pc_state := COUNT;
     signal num_cycles_last_case : unsigned(15 downto 0) := to_unsigned(0,16);
-    signal num_cycles_last_case_nxt : unsigned(15 downto 0) := to_unsigned(0,16);
     signal clk_counter : unsigned(15 downto 0) := to_unsigned(0,16);
-    signal clk_counter_nxt : unsigned(15 downto 0) := to_unsigned(0,16);
 
 
     --States
@@ -115,10 +113,10 @@ architecture rtl of rsa_core is
         end if;
     end function;
 begin
-    rsa_status <= std_logic_vector(num_cycles_last_case) & rsm_status(31 downto 16);
+    rsa_status <= std_logic_vector(num_cycles_last_case) & rsm_status(15 downto 0);
     
     --Iterface to AXI input stream
-    axi_in : process(ipi,axi_in_state,msgin_valid) is
+    axi_in : process(ipi,axi_in_state,msgin_last,msgin_valid,message_counter_in,message_counter_target,message_counter_target_wr_ptr) is
         
     begin
         case axi_in_state is
@@ -174,7 +172,7 @@ begin
     )
     port map(
         CLK => clk,
-        RST_N => reset_n,
+        RST => not reset_n,
         
         --Input control signals to the blakeley stage module are outputs from the tb
         ILI => ilo,
@@ -192,33 +190,24 @@ begin
         DPO => open,
         DCO => msgout_data,
         
-        rsm_status => rsa_status
+        rsm_status => rsm_status
     );
     
-    update_performance_counter : process(ili,clk_counter,performance_counter_state) is
+    update_performance_counter : process(clk, ili) is
     begin
-        case(performance_counter_state) is
-            when COUNT =>
-                num_cycles_last_case_nxt <= num_cycles_last_case;
-                clk_counter_nxt <= clk_counter + 1;
-                if(ili = '1') then
-                    performance_counter_state <= SAVE;
-                else
-                    performance_counter_state <= COUNT;
-                end if;
-            when SAVE =>
-                num_cycles_last_case_nxt <= clk_counter;
-                clk_counter_nxt <= to_unsigned(0,16);
-                if(ili = '0') then
-                    performance_counter_state <= COUNT;
-                else
-                    performance_counter_state <= SAVE;
-                end if;
-        end case;
+        if (clk'event and clk = '1') then
+            clk_counter <= clk_counter + 1;
+        end if;
+        if (ili'event and ili = '1') then
+            num_cycles_last_case <= clk_counter;
+        end if;
+        if ili'event and ili = '0' then
+            clk_counter <= (others => '0');
+        end if;
     end process update_performance_counter;
     
     --Iterface to AXI output stream
-    axi_out : process(ili,axi_out_state,msgout_ready) is
+    axi_out : process(ili,axi_out_state,msgout_ready,message_counter_out,message_counter_target,message_counter_target_rd_ptr) is
         
     begin
         case(axi_out_state) is
@@ -284,9 +273,6 @@ begin
             message_counter_target_wr_ptr <= message_counter_target_wr_ptr_nxt;
             message_counter_out <= message_counter_out_nxt;
             message_counter_target_rd_ptr <= message_counter_target_rd_ptr_nxt;
-
-            num_cycles_last_case <= num_cycles_last_case_nxt;
-            clk_counter <= clk_counter_nxt;
         end if;
     end process fsm_seq;
 end rtl;

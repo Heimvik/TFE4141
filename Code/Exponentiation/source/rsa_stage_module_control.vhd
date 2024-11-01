@@ -31,7 +31,7 @@ entity rsa_stage_module_control is
     port(
         --Defaults
         clk : in std_logic;
-        rst_n : in std_logic;
+        rst : in std_logic;
 
         --Data signals
         es : in std_logic_vector ((c_block_size/num_pipeline_stages)-1 downto 0);
@@ -79,7 +79,7 @@ architecture rsa of rsa_stage_module_control is
     signal es_index_nxt : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
     
     constant es_size : integer := c_block_size/num_pipeline_stages;
-
+    
 begin
     control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
     control_status(control_offset+ipo_bit downto control_offset+ilo_bit) <= ipo_internal & ilo_internal;
@@ -88,7 +88,7 @@ begin
     ilo <= ilo_internal;
     ipo <= ipo_internal;
     
-    fsm_comb : process(stage_state,blakeley_module_state,ili,es,c_bm_rval,p_bm_rval,ipi) is
+    fsm_comb : process(stage_state,blakeley_module_state,ili,es,c_bm_rval,p_bm_rval,ipi,es_index) is
     begin
         case(stage_state) is
             when IDLE =>
@@ -324,24 +324,24 @@ begin
         end case;
     end process fsm_comb;
     
-    fsm_seq : process(clk,rst_n) is
+    fsm_seq : process(clk,rst) is
     begin
         if(clk'event and clk = '1') then
             stage_state <= stage_state_nxt;
             blakeley_module_state <= blakeley_module_state_nxt;
             es_index <= es_index_nxt;
         end if;
-        if rst_n = '0' then
+        if rst = '1' then
             stage_state <= IDLE;
             blakeley_module_state <= INIT;
             es_index <= to_unsigned(0,log2_c_block_size);
             c_reg_rst <= '1';
             p_reg_rst <= '1';
-            rst_bms <= '1';
+            rst_bms <= '1'; --Causes mayhem if not internal signal used
         else
             c_reg_rst <= '0';
             p_reg_rst <= '0';
-            rst_bms <= '0';
+            rst_bms <= '0'; --Causes mayhem if not internal signal used
         end if;
     end process fsm_seq;
 end architecture rsa;

@@ -13,7 +13,7 @@ entity rsa_stage_module is
 	);
     port (
         CLK : in std_logic;
-        RST_N : in std_logic;
+        RST : in std_logic;
         
         --Control signals             
         ILI : in std_logic;
@@ -101,7 +101,7 @@ begin
         )
         port map(
             clk => CLK,
-            rst_n => RST_N,
+            rst => RST,
             
             es => ES,
             ili => ILI,

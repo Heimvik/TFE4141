@@ -135,7 +135,7 @@ begin
         
     dpo <= p;
 
-    datapath_seq : process(clk) is
+    datapath_seq : process(clk,c_reg_rst) is
     begin
         --Gated clocks
         if(clk'event and clk = '1') then

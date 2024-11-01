@@ -7,14 +7,12 @@ entity rsa_core_pipeline is
 		-- Users to add parameters here
 		c_block_size          : integer;
 		log2_c_block_size     : integer;
-		
 		num_pipeline_stages     : integer;
-		
 		num_status_bits       : integer
 	);
     port (
         CLK : in std_logic;
-        RST_N : in std_logic;
+        RST : in std_logic;
         
         --Control signals             
         ILI : in std_logic;
@@ -55,8 +53,8 @@ begin
 
     gen_status : process(rsm_status_internals)
     begin
-        for i in num_pipeline_stages downto 1 loop
-            rsm_status(i) <= rsm_status_internals(i)(7);
+        for i in 1 to num_pipeline_stages loop
+            rsm_status(i-1) <= rsm_status_internals(i)(7);
         end loop;
     end process gen_status;
 
@@ -76,7 +74,7 @@ begin
         )
         port map(
             CLK => CLK,
-            RST_N => RST_N,
+            RST => RST,
             ILI => ilx_internals(i-1),
             IPO => ipx_internals(i-1),
             ILO => ilx_internals(i),

@@ -47,7 +47,7 @@ architecture rtl of blakeley_module_control is
     signal control_state : c_state := IDLE; 
     signal control_state_nxt : c_state;
 begin    
-    fsm_comb : process(control_state,abval,ainc_out,sum_out) is
+    fsm_comb : process(control_state,abval,ainc_out,sum_out,n) is
         variable ainc_limit : unsigned(log2_c_block_size-1 downto 0);
     begin
         ainc_limit := (others => '1');

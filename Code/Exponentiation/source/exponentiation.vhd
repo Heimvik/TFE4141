@@ -12,7 +12,7 @@ entity rsa_core_pipeline is
 	);
     port (
         CLK : in std_logic;
-        RST : in std_logic;
+        RST_N : in std_logic;
         
         --Control signals             
         ILI : in std_logic;
@@ -58,7 +58,7 @@ begin
         end loop;
     end process gen_status;
 
-    ilx_internals(0) <= ILI; 
+    ilx_internals(0) <= ILI;
     IPO <= ipx_internals(0);
     
     dcx_internals(0) <= DCI;
@@ -74,7 +74,7 @@ begin
         )
         port map(
             CLK => CLK,
-            RST => RST,
+            RST => not RST_N,
             ILI => ilx_internals(i-1),
             IPO => ipx_internals(i-1),
             ILO => ilx_internals(i),
@@ -86,6 +86,7 @@ begin
             DPI => dpx_internals(i-1),
             DCO => dcx_internals(i),
             DPO => dpx_internals(i),
+            
             rsm_status => rsm_status_internals(i)
         );
     end generate gen_pipeline;

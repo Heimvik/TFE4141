@@ -6,6 +6,7 @@ entity rsa_stage_module_control is
     generic(
         c_block_size : integer;
         log2_c_block_size : integer;
+        log2_es_size : integer := 4;
         
         num_pipeline_stages : integer;
         num_status_bits : integer;
@@ -63,28 +64,28 @@ entity rsa_stage_module_control is
     );
 end rsa_stage_module_control;
 
-architecture rsa of rsa_stage_module_control is
+architecture rtl of rsa_stage_module_control is
     type s_state is (IDLE,SAVE_IN,ACK_SAVE_IN,RUN_BM,HOLD_OUT);
-    type bm_state is (INIT,CP_FINISHED,P_FINISHED);
+    type bm_state is (RUN_CP,FINISHED_CP);
     
     signal stage_state : s_state := IDLE;
     signal stage_state_nxt : s_state := IDLE;
-    signal blakeley_module_state : bm_state := INIT;
-    signal blakeley_module_state_nxt : bm_state := INIT;
+    signal blakeley_module_state : bm_state := RUN_CP;
+    signal blakeley_module_state_nxt : bm_state := RUN_CP;
     
     signal ilo_internal : std_logic;
     signal ipo_internal : std_logic;
     
-    signal es_index : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
-    signal es_index_nxt : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
+    signal es_index : unsigned(log2_es_size-1 downto 0) := to_unsigned(0,log2_es_size);
+    signal es_index_nxt : unsigned(log2_es_size-1 downto 0) := to_unsigned(0,log2_es_size);
     
     constant es_size : integer := c_block_size/num_pipeline_stages;
-    
+
 begin
     control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
     control_status(control_offset+ipo_bit downto control_offset+ilo_bit) <= ipo_internal & ilo_internal;
     control_status(control_offset+p_bm_rval_bit downto control_offset+c_bm_rval_bit) <= p_bm_rval & c_bm_rval;
-    control_status(control_offset+es_index_offset+log2_c_block_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
+    control_status(control_offset+es_index_offset+log2_es_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
     ilo <= ilo_internal;
     ipo <= ipo_internal;
     
@@ -93,6 +94,7 @@ begin
         case(stage_state) is
             when IDLE =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "000";
+                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                 ilo_internal <= '0';
                 ipo_internal <= '0';
                 
@@ -105,7 +107,7 @@ begin
                 c_reg_clk_en <= '0';
                 p_reg_clk_en <= '0';
                 
-                blakeley_module_state_nxt <= INIT;
+                blakeley_module_state_nxt <= RUN_CP;
                 es_index_nxt <= es_index;
                 
                 if ili = '1' then
@@ -120,6 +122,7 @@ begin
                 
             when SAVE_IN =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "001";
+                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                 ilo_internal <= '0';
                 ipo_internal <= '0';
                 
@@ -136,12 +139,13 @@ begin
                 c_reg_rst <= '0';
                 p_reg_rst <= '0';
                 
-                blakeley_module_state_nxt <= INIT;
+                blakeley_module_state_nxt <= RUN_CP;
                 es_index_nxt <= es_index;
                 stage_state_nxt <= ACK_SAVE_IN;
                 
             when ACK_SAVE_IN =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "010";
+                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                 --Ack for the values you popped off
                 ilo_internal <= '0';
                 ipo_internal <= '1';
@@ -158,7 +162,7 @@ begin
                 c_reg_rst <= '0';
                 p_reg_rst <= '0';
                 
-                blakeley_module_state_nxt <= INIT;
+                blakeley_module_state_nxt <= RUN_CP;
                 es_index_nxt <= es_index;
                 --To ensure that previous stage has returned to idle, such that coming around again before the previous stage won't pick up the same value
                 if ili = '0' then
@@ -181,102 +185,52 @@ begin
                 
                 
                 case(blakeley_module_state) is
-                    when INIT =>
+                    when RUN_CP =>
                         control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                         
-                        p_bm_abval <= '1';                        
+                        c_bm_abval <= '1';                        
+                        p_bm_abval <= '1';
                         stage_state_nxt <= RUN_BM;
-                        es_index_nxt <= es_index;
                         
-                        if es(to_integer(es_index)) = '1' then
-                            c_bm_abval <= '1';
-                            if c_bm_rval = '1' and p_bm_rval = '1' then
-                                --NB: The hold time when entering CP_FINISHED might be to small for clocking in results!
-                                c_reg_clk_en <= '1';
-                                p_reg_clk_en <= '1';
-                                blakeley_module_state_nxt <= CP_FINISHED;
-                            else
-                                c_reg_clk_en <= '0';
-                                p_reg_clk_en <= '0';
-                                blakeley_module_state_nxt <= INIT;
-                            end if;
+                        if c_bm_rval = '1' and p_bm_rval = '1' then
+                            --NB: The hold time when entering CP_FINISHED might be to small for clocking in results!
+                            c_reg_clk_en <= std_logic(es(to_integer(es_index)));
+                            p_reg_clk_en <= '1';
+                            es_index_nxt <= es_index + 1; --Intended to overflow upon reaching max to save LUT
+                            blakeley_module_state_nxt <= FINISHED_CP;
                         else
-                            --NB: This can be utilized better (it uses only one blakeley module when es index not present
-                            c_bm_abval <= '0';
-                            if p_bm_rval = '1' then
-                                c_reg_clk_en <= '0';
-                                p_reg_clk_en <= '1';
-                                blakeley_module_state_nxt <= P_FINISHED;
-                            else
-                                c_reg_clk_en <= '0';
-                                p_reg_clk_en <= '0';
-                                blakeley_module_state_nxt <= INIT;
-                            end if;
+                            c_reg_clk_en <= '0';
+                            p_reg_clk_en <= '0';
+                            es_index_nxt <= es_index;
+                            blakeley_module_state_nxt <= RUN_CP;
                         end if;
-                    when CP_FINISHED =>
+                        
+                    when FINISHED_CP =>
                         control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "01";
           
                         c_reg_clk_en <= '0';
                         p_reg_clk_en <= '0';
                                         
-                        --Negate ABVAL
                         c_bm_abval <= '0';
                         p_bm_abval <= '0';
                         
-                        --Wait for RVAL negation
-                        if c_bm_rval = '0' and p_bm_rval = '0' then
-                            blakeley_module_state_nxt <= INIT;
-                            if es_index = to_unsigned(es_size-1,log2_c_block_size) then
-                                es_index_nxt <= to_unsigned(0,log2_c_block_size);
-                                stage_state_nxt <= HOLD_OUT;
-                            else
-                                es_index_nxt <= es_index + 1;
-                                stage_state_nxt <= RUN_BM;
-                            end if;
-                        else
-                            blakeley_module_state_nxt <= CP_FINISHED;
-                            es_index_nxt <= es_index;
-                            stage_state_nxt <= RUN_BM;
-                        end if;
-                    when P_FINISHED =>
-                        control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "10";
-
-                        c_reg_clk_en <= '0';
-                        p_reg_clk_en <= '0';
-                        
-                        --Negate ABVAL
-                        c_bm_abval <= '0';
-                        p_bm_abval <= '0';
-                        
-                        --Wait for RVAL negation
-                        if p_bm_rval = '0' then
-                            blakeley_module_state_nxt <= INIT;
-                            if es_index = to_unsigned(es_size-1,log2_c_block_size) then
-                                es_index_nxt <= to_unsigned(0,log2_c_block_size);
-                                stage_state_nxt <= HOLD_OUT;
-                            else
-                                es_index_nxt <= es_index + 1;
-                                stage_state_nxt <= RUN_BM;
-                            end if;
-                        else
-                            blakeley_module_state_nxt <= CP_FINISHED;
-                            es_index_nxt <= es_index;
-                            stage_state_nxt <= RUN_BM;
-                        end if;
-                    when others=>
-                        control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "11";
-                        c_reg_clk_en <= '0';
-                        p_reg_clk_en <= '0';
-                                        
-                        c_bm_abval <= '0';
-                        p_bm_abval <= '0';
-                        
-                        blakeley_module_state_nxt <= INIT;
                         es_index_nxt <= es_index;
-                        stage_state_nxt <= RUN_BM;
+                        
+                        if c_bm_rval = '0' and p_bm_rval = '0' then
+                            blakeley_module_state_nxt <= RUN_CP;
+                            if es_index = to_unsigned(0,log2_es_size) then
+                                stage_state_nxt <= HOLD_OUT;
+                            else
+                                stage_state_nxt <= RUN_BM;
+                            end if;
+                        else
+                            blakeley_module_state_nxt <= FINISHED_CP;
+                            stage_state_nxt <= RUN_BM;
+                        end if;
                 end case;
             when HOLD_OUT =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "100";
+                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                 ilo_internal <= '1';
                 ipo_internal <= '0';
                 
@@ -292,35 +246,13 @@ begin
                 c_reg_rst <= '0';
                 p_reg_rst <= '0';
                 
-                blakeley_module_state_nxt <= INIT;
+                blakeley_module_state_nxt <= RUN_CP;
                 es_index_nxt <= es_index;
                 if ipi = '1' then
                     stage_state_nxt <= IDLE;
                 else
                     stage_state_nxt <= HOLD_OUT;
                 end if;
-            when others =>
-                control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "111";
-                control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "11";
-                
-                ilo_internal <= '0';
-                ipo_internal <= '0';
-                
-                c_mux_ctl <= '0';
-                p_mux_ctl <= '0';
-                
-                c_bm_abval <= '0';
-                p_bm_abval <= '0';
-                
-                c_reg_clk_en <= '0';
-                p_reg_clk_en <= '0';
-                
-                c_reg_rst <= '0';
-                p_reg_rst <= '0';
-                
-                blakeley_module_state_nxt <= INIT;
-                es_index_nxt <= es_index;
-                stage_state_nxt <= IDLE;
         end case;
     end process fsm_comb;
     
@@ -333,21 +265,11 @@ begin
         end if;
         if rst = '1' then
             stage_state <= IDLE;
-            blakeley_module_state <= INIT;
-            es_index <= to_unsigned(0,log2_c_block_size);
-            c_reg_rst <= '1';
-            p_reg_rst <= '1';
-            rst_bms <= '1'; --Causes mayhem if not internal signal used
+            es_index <= to_unsigned(0,log2_es_size);
+            rst_bms <= '1';
         else
-            c_reg_rst <= '0';
-            p_reg_rst <= '0';
-            rst_bms <= '0'; --Causes mayhem if not internal signal used
+            rst_bms <= '0';
         end if;
     end process fsm_seq;
-end architecture rsa;
-                
-                
-                
-                
-                
+end architecture rtl;
                 

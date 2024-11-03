@@ -172,7 +172,7 @@ begin
     )
     port map(
         CLK => clk,
-        RST => not reset_n,
+        RST_N => reset_n,
         
         --Input control signals to the blakeley stage module are outputs from the tb
         ILI => ilo,

@@ -6,7 +6,7 @@ entity rsa_stage_module_control is
     generic(
         c_block_size : integer;
         log2_c_block_size : integer;
-        log2_es_size : integer := 4;
+        log2_es_size : integer;
         
         num_pipeline_stages : integer;
         num_status_bits : integer;

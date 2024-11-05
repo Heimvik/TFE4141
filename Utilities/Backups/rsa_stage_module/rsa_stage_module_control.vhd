@@ -265,6 +265,7 @@ begin
         end if;
         if rst = '1' then
             stage_state <= IDLE;
+            es_index <= to_unsigned(0,log2_c_block_size);
             rst_bms <= '1';
         else
             rst_bms <= '0';

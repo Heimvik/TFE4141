@@ -26,7 +26,7 @@ architecture struct of rsa_accelerator_tb is
 
 	-- RENAME this constant to "long_test" for more comprehensive tests
 	-- "short_test" for shorter tests
-	constant C_TESTCASE_FOLDER: string := "C:\Users\cmhei\OneDrive\Dokumenter\Semester 7\TFE4141 DDS1\Project\Code\RSA_accelerator\testbench\rsa_tests\long_tests";
+	constant C_TESTCASE_FOLDER: string := "C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Code\RSA_accelerator\testbench\rsa_tests\long_tests";
 
 	-----------------------------------------------------------------------------
 	-- Clocks and reset

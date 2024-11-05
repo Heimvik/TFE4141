@@ -4,11 +4,11 @@ use IEEE.numeric_std.all;
 
 entity rsa_stage_module_control is
     generic(
-        c_block_size : integer;
-        log2_c_block_size : integer;
+        c_block_size : integer := 256;
+        log2_c_block_size : integer := 8;
         
-        num_pipeline_stages : integer;
-        num_status_bits : integer;
+        c_pipeline_stages : integer;
+        num_status_bits : integer := 32;
         
         control_offset : integer := 0;
         
@@ -34,7 +34,7 @@ entity rsa_stage_module_control is
         rst : in std_logic;
 
         --Data signals
-        es : in std_logic_vector ((c_block_size/num_pipeline_stages)-1 downto 0);
+        es : in std_logic_vector ((c_block_size/c_pipeline_stages)-1 downto 0);
         
         --Control signals
         ili : in std_logic;
@@ -72,14 +72,14 @@ architecture rsa of rsa_stage_module_control is
     signal blakeley_module_state : bm_state := INIT;
     signal blakeley_module_state_nxt : bm_state := INIT;
     
-    signal ilo_internal : std_logic;
-    signal ipo_internal : std_logic;
+    signal ilo_internal : std_logic := '0';
+    signal ipo_internal : std_logic := '0';
     
     signal es_index : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
     signal es_index_nxt : unsigned(log2_c_block_size-1 downto 0) := to_unsigned(0,log2_c_block_size);
     
-    constant es_size : integer := c_block_size/num_pipeline_stages;
-    
+    constant es_size : integer := c_block_size/c_pipeline_stages;
+
 begin
     control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
     control_status(control_offset+ipo_bit downto control_offset+ilo_bit) <= ipo_internal & ilo_internal;
@@ -88,7 +88,7 @@ begin
     ilo <= ilo_internal;
     ipo <= ipo_internal;
     
-    fsm_comb : process(stage_state,blakeley_module_state,ili,es,c_bm_rval,p_bm_rval,ipi,es_index) is
+    fsm_comb : process(stage_state,blakeley_module_state,ili,es,c_bm_rval,p_bm_rval,ipi) is
     begin
         case(stage_state) is
             when IDLE =>
@@ -333,8 +333,6 @@ begin
         end if;
         if rst = '1' then
             stage_state <= IDLE;
-            blakeley_module_state <= INIT;
-            es_index <= to_unsigned(0,log2_c_block_size);
             rst_bms <= '1';
         else
             rst_bms <= '0';

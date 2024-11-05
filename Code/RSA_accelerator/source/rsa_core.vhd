@@ -22,7 +22,11 @@ use ieee.numeric_std.all;
 entity rsa_core is
 	generic (
         c_block_size : integer  := 256;
-        num_pipeline_stages : integer := 16;
+        
+        --To change the number of cores, change BOTH:
+        num_pipeline_stages : integer := 4;
+        log2_es_size : integer := 6;        --HAS to be the result of log2(c_block_size/num_pipeline_stages)
+        
         log2_c_block_size : integer := 8;
         log2_max_message_count : integer := 16;
         num_status_bits : integer := 32
@@ -168,6 +172,7 @@ begin
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
         num_pipeline_stages => num_pipeline_stages,
+        log2_es_size => log2_es_size,
         num_status_bits => num_status_bits
     )
     port map(

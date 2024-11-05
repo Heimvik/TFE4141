@@ -1,19 +1,19 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.numeric_std.all;
 
-entity rsa_core_pipeline is
+entity rsa_core_pipeline_x is
     generic (
 		-- Users to add parameters here
-		c_block_size          : integer;
-		log2_c_block_size     : integer;
-        num_pipeline_stages   : integer;
-		log2_es_size          : integer;
-		num_status_bits       : integer
+		c_block_size          : integer := 256;
+		log2_c_block_size     : integer := 8;
+		
+		c_pipeline_stages     : integer := 16;
+		
+		num_status_bits       : integer := 32
 	);
     port (
         CLK : in std_logic;
-        RST_N : in std_logic;
+        RST : in std_logic;
         
         --Control signals             
         ILI : in std_logic;
@@ -30,34 +30,29 @@ entity rsa_core_pipeline is
         DCI : in std_logic_vector (c_block_size-1 downto 0);
         
         --Status registers
-        rsm_status : out std_logic_vector(num_status_bits-1 downto 0)
+        rsm_status : out std_logic_vector(num_status_bits-1 downto 0);
+        bm_status : out std_logic_vector(num_status_bits-1 downto 0)
     );
-end rsa_core_pipeline;
+end rsa_core_pipeline_x;
 
-architecture rtl of rsa_core_pipeline is
+architecture rtl of rsa_core_pipeline_x is
     --Intermediate signals in the pipeline
     --First index i gives intermediates between stage i and i+1
-    signal ilx_internals : std_logic_vector(num_pipeline_stages downto 0);
-    signal ipx_internals : std_logic_vector(num_pipeline_stages downto 0);
+    signal ilx_internals : std_logic_vector(c_pipeline_stages+1 downto 0);
+    signal ipx_internals : std_logic_vector(c_pipeline_stages+1 downto 0);
 
     -- Signals for DPO, DCO, etc.
-    type data_internals is array (num_pipeline_stages+1 downto 0) of std_logic_vector(c_block_size-1 downto 0);
+    type data_internals is array (c_pipeline_stages+1 downto 0) of std_logic_vector(c_block_size-1 downto 0);
     signal dcx_internals : data_internals;
     signal dpx_internals : data_internals;
     
-    type status_internals is array (num_pipeline_stages downto 1) of std_logic_vector(num_status_bits-1 downto 0);
+    type status_internals is array (c_pipeline_stages downto 1) of std_logic_vector(num_status_bits-1 downto 0);
     signal rsm_status_internals : status_internals;
-    
-    constant es_size : integer := c_block_size/num_pipeline_stages;
+    signal bm_status_internals : status_internals;
 
+    constant es_size : integer := c_block_size/c_pipeline_stages;
 begin
-
-    gen_status : process(rsm_status_internals)
-    begin
-        for i in 1 to num_pipeline_stages loop
-            rsm_status(i-1) <= rsm_status_internals(i)(7);
-        end loop;
-    end process gen_status;
+    rsm_status <= ilx_internals(c_pipeline_stages+1 downto 2) & ipx_internals(c_pipeline_stages+1 downto 2);
 
     ilx_internals(0) <= ILI;
     IPO <= ipx_internals(0);
@@ -65,18 +60,17 @@ begin
     dcx_internals(0) <= DCI;
     dpx_internals(0) <= DPI;
 
-    gen_pipeline : for i in 1 to num_pipeline_stages generate
+    gen_pipeline : for i in 1 to c_pipeline_stages generate
         stage : entity work.rsa_stage_module
         generic map(
             c_block_size => c_block_size,
             log2_c_block_size => log2_c_block_size,
-            num_pipeline_stages => num_pipeline_stages,
-            log2_es_size => log2_es_size,
+            c_pipeline_stages => c_pipeline_stages,
             num_status_bits => num_status_bits
         )
         port map(
             CLK => CLK,
-            RST => not RST_N,
+            RST => RST,
             ILI => ilx_internals(i-1),
             IPO => ipx_internals(i-1),
             ILO => ilx_internals(i),
@@ -88,14 +82,15 @@ begin
             DPI => dpx_internals(i-1),
             DCO => dcx_internals(i),
             DPO => dpx_internals(i),
-            
-            rsm_status => rsm_status_internals(i)
+            rsm_status => rsm_status_internals(i),
+            bm_status => bm_status_internals(i)
         );
     end generate gen_pipeline;
     
-    ipx_internals(num_pipeline_stages) <= IPI;
-    ILO <= ilx_internals(num_pipeline_stages);
+    ipx_internals(c_pipeline_stages) <= IPI;
+    ILO <= ilx_internals(c_pipeline_stages);
 
-    DCO <= dcx_internals(num_pipeline_stages);
-    DPO <= dcx_internals(num_pipeline_stages);
+    DCO <= dcx_internals(c_pipeline_stages);
+    DPO <= dcx_internals(c_pipeline_stages);
+    
 end rtl;

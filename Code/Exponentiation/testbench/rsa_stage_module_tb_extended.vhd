@@ -10,7 +10,10 @@ entity rsa_pipeline_tb is
     generic(
         c_block_size : integer := 256;
         log2_c_block_size : integer := 8;
-        c_pipeline_stages : integer := 16;
+        
+        num_pipeline_stages : integer := 16;
+        log2_es_size : integer := 4;   --Has to be log2(c_block_size/num_pipeline_stages)
+        
         num_status_bits : integer := 32;
         CLK_PERIOD : time := 1 ns        
     );
@@ -83,12 +86,13 @@ begin
     generic map(
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
-        c_pipeline_stages => c_pipeline_stages,
+        num_pipeline_stages => num_pipeline_stages,
+        log2_es_size => log2_es_size,
         num_status_bits => num_status_bits
     )
     port map(
         CLK => clk,
-        RST => rst,
+        RST_N => not rst,
         
         --Input control signals to the blakeley stage module are outputs from the tb
         ILI => ilo,
@@ -117,7 +121,7 @@ begin
         
         variable comma : character;
     begin
-        file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester 7\TFE4141 DDS1\Project\Utilities\key.csv",READ_MODE);
+        file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Utilities\key.csv",READ_MODE);
         readline(csv_file,current_line);
         read(current_line,current_case_e);
         read(current_line,comma);
@@ -143,7 +147,7 @@ begin
                 rst <= '0';
                 
                 if not file_opened then
-                    file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester 7\TFE4141 DDS1\Project\Utilities\messages.csv",READ_MODE);
+                    file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Utilities\messages.csv",READ_MODE);
                     file_opened := true;
                 end if;
                 if cases_in_count /= cases_in_count_prev then
@@ -185,8 +189,8 @@ begin
             when PULSE_RST =>
                 rst <= '1';
                 --The rst causes a flush of the pipeline, effectively discarding all that lies in it
-                cases_out_count := cases_out_count + c_pipeline_stages;
-                cases_out_count_prev := cases_out_count_prev + c_pipeline_stages;
+                cases_out_count := cases_out_count + num_pipeline_stages;
+                cases_out_count_prev := cases_out_count_prev + num_pipeline_stages;
                 rst_at_case(cases_in_count) := '1';
                 report "RST"
                 severity note;

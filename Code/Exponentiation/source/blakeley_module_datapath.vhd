@@ -70,8 +70,6 @@ architecture rtl of blakeley_module_datapath is
     signal sub2 : unsigned(c_block_size+1 downto 0);
 begin
     -- Debug lines
-    --datapath_status(datapath_offset+ainc_debug_offset+log2_c_block_size-1 downto datapath_offset+ainc_debug_offset) <= std_logic_vector(ainc);
-    --datapath_status(datapath_offset+mux_ctl_offset+mux_ctl_size-1 downto datapath_offset+mux_ctl_offset) <= std_logic_vector(mux_ctl);
     
     -- Datapath combinatorials
     ainc_nxt <= ainc + to_unsigned(1,log2_c_block_size);
@@ -96,16 +94,14 @@ begin
     
     sel_sub_comb : process(mux_ctl, sub0, sub1, sub2) is
     begin
+        r_out <= sub0(c_block_size-1 downto 0);
         case(to_integer(mux_ctl)) is
             when 0 =>
                 r_out <= sub0(c_block_size-1 downto 0);
-                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 1 =>
                 r_out <= sub1(c_block_size-1 downto 0);
-                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when 2 =>
                 r_out <= sub2(c_block_size-1 downto 0);
-                --datapath_status(datapath_offset+mux_ctl_ierr_bit) <= '0';
             when others =>
         end case;
     end process sel_sub_comb;

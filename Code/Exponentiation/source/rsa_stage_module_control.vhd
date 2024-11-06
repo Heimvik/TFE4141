@@ -82,19 +82,19 @@ architecture rtl of rsa_stage_module_control is
     constant es_size : integer := c_block_size/num_pipeline_stages;
 
 begin
-    control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
-    control_status(control_offset+ipo_bit downto control_offset+ilo_bit) <= ipo_internal & ilo_internal;
-    control_status(control_offset+p_bm_rval_bit downto control_offset+c_bm_rval_bit) <= p_bm_rval & c_bm_rval;
-    control_status(control_offset+es_index_offset+log2_es_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
     ilo <= ilo_internal;
     ipo <= ipo_internal;
     
     fsm_comb : process(stage_state,blakeley_module_state,ili,es,c_bm_rval,p_bm_rval,ipi,es_index) is
     begin
+        control_status <= (others => '0');
+        control_status(control_offset+ipi_bit downto control_offset+ili_bit) <= ipi & ili;
+        control_status(control_offset+ipo_bit downto control_offset+ilo_bit) <= ipo_internal & ilo_internal;
+        control_status(control_offset+p_bm_rval_bit downto control_offset+c_bm_rval_bit) <= p_bm_rval & c_bm_rval;
+        control_status(control_offset+es_index_offset+log2_es_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
         case(stage_state) is
             when IDLE =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "000";
-                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                 ilo_internal <= '0';
                 ipo_internal <= '0';
                 
@@ -122,7 +122,6 @@ begin
                 
             when SAVE_IN =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "001";
-                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                 ilo_internal <= '0';
                 ipo_internal <= '0';
                 
@@ -145,7 +144,6 @@ begin
                 
             when ACK_SAVE_IN =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "010";
-                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
                 --Ack for the values you popped off
                 ilo_internal <= '0';
                 ipo_internal <= '1';
@@ -230,7 +228,7 @@ begin
                 end case;
             when HOLD_OUT =>
                 control_status(control_offset+s_state_offset+s_state_size-1 downto control_offset+s_state_offset) <= "100";
-                --control_status(control_offset+bm_state_offset+bm_state_size-1 downto control_offset+bm_state_offset) <= "00";
+                
                 ilo_internal <= '1';
                 ipo_internal <= '0';
                 

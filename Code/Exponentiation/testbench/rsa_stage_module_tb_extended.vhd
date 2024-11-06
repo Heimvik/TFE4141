@@ -253,9 +253,3 @@ begin
         end if;
     end process fsm_seq;
 end rtl;
-        
-    
-    
-
-        
-        

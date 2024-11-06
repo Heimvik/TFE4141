@@ -146,6 +146,7 @@ begin
                 file_close(csv_file);
                 report "All messages sent in"
                 severity note;
+                file_opened := false;
             when others =>
         end case;
     end process simulate_axi_in;

@@ -258,6 +258,8 @@ begin
         wait for 1*CLK_PERIOD;
         rst_tester <= '0';
         
+        wait;
+        
     end process testbench_control;
 end rtl;
         

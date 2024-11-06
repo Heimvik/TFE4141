@@ -123,17 +123,18 @@ def generate_csv(m_file, k_file, num_cases,min_value, max_value):
 
     with open(m_file, mode='w', newline='') as message_file:
         writerM = csv.writer(message_file)
-        for _ in range(num_cases):
-            binary_M = generate_message(min_value,int(binary_n, 2)-1)
-            binary_C = to_binary_string(pow(int(binary_M, 2), int(binary_e, 2), int(binary_n, 2)))
-            writerM.writerow([binary_M, binary_C, 'EOL'])
-            print(f"Generated message - M: {hex(int(binary_M,2))}, (length: {len(binary_M)}), C: {hex(int(binary_C,2))}, (length: {len(binary_C)})")
-        
-        # Write the end of file indicator
-        writerM.writerow(['0' * 256, '0' * 256, '0' * 256, '0' * 256, 'EOL'])  # Ensure the end row has the same binary length
+        for i in range(0,2):
+            for _ in range(num_cases):
+                binary_M = generate_message(min_value,int(binary_n, 2)-1)
+                binary_C = to_binary_string(pow(int(binary_M, 2), int(binary_e, 2), int(binary_n, 2)))
+                writerM.writerow([binary_M, binary_C, 'EOL'])
+                print(f"Generated message - M: {hex(int(binary_M,2))}, (length: {len(binary_M)}), C: {hex(int(binary_C,2))}, (length: {len(binary_C)})")
+            
+            # Write the end of file indicator
+            writerM.writerow(['0' * 256, '0' * 256, '0' * 256, '0' * 256, 'EOL'])  # Ensure the end row has the same binary length
 
 if __name__ == "__main__":
-    NUM_CASES = 8  # Set your desired number of cases
+    NUM_CASES = 19  # Set your desired number of cases
     MAX_VAL_UPPER = int((2**256)-1)  # Set maximum value for n
     MIN_VAL = int(2**255)
     msg_file_name = "messages.csv"

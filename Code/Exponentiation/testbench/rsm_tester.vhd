@@ -16,10 +16,12 @@ entity rsm_tester is
     );
     
     port(
-        tester_en : in std_logic;
+        rsm_tester_start : in std_logic;
+        rsm_tester_finished : out std_logic;
         
         clk : in std_logic;
-        rst : out std_logic;
+        rst_tester : in std_logic;
+        rst_dut : out std_logic;
         
         --Control signals             
         ili : in std_logic;
@@ -37,7 +39,7 @@ entity rsm_tester is
 end rsm_tester;
 
 architecture rtl of rsm_tester is        
-    type ai_state is (WAIT_FOR_EN,GET_FROM_AXI,HOLD_FOR_PIPELINE,FINISHED_IN,PULSE_RST); --Finished are only here in tb
+    type ai_state is (WAIT_FOR_START,GET_FROM_AXI,HOLD_FOR_PIPELINE,FINISHED_IN,PULSE_RST); --Finished are only here in tb
     type ao_state is (WAIT_FOR_PIPELINE,GIVE_TO_AXI,FINISHED_OUT); --Finished are only here in tb
     signal axi_in_state : ai_state := GET_FROM_AXI;
     signal axi_in_state_nxt : ai_state := GET_FROM_AXI;
@@ -85,7 +87,7 @@ begin
         wait;
     end process simulate_axi_regio;
     
-    simulate_axi_in : process(ipi,axi_in_state) is
+    simulate_axi_in : process(ipi,axi_in_state,rsm_tester_start) is
         variable current_case_m, current_case_correct_c: std_logic_vector(c_block_size-1 downto 0);
         variable cases_in_count_prev : integer := 0;
         variable file_opened : boolean := false;
@@ -97,15 +99,16 @@ begin
 
     begin
         case axi_in_state is
-            when WAIT_FOR_EN =>
-                if(tester_en = '1') then
+            when WAIT_FOR_START =>
+                if(rsm_tester_start = '1') then
+                    
                     axi_in_state_nxt <= GET_FROM_AXI;
                 else
-                    axi_in_state_nxt <= WAIT_FOR_EN;
+                    axi_in_state_nxt <= WAIT_FOR_START;
                 end if;
             when GET_FROM_AXI =>
                 ilo <= '0';
-                rst <= '0';
+                rst_dut <= '0';
                 
                 if not file_opened then
                     file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Utilities\messages.csv",READ_MODE);
@@ -113,7 +116,7 @@ begin
                 end if;
                 
                 if cases_in_count /= cases_in_count_prev then
-                    readline(csv_file,current_line);
+                    readline(csv_file,current_line);--Have to reset current_line in order to read from the top again!!!!!!!!!!!!!!! TODO!
                     read(current_line,current_case_m);
                     read(current_line,comma);
                     read(current_line,current_case_correct_c);
@@ -152,11 +155,14 @@ begin
         variable fail_count : integer := 0;
         
     begin
+        rsm_tester_finished <= '0';
         case(axi_out_state) is
             when WAIT_FOR_PIPELINE =>
                 ipo <= '0';
                 if ili = '1' then
                     axi_out_state_nxt <= GIVE_TO_AXI;
+                else
+                    axi_out_state_nxt <= WAIT_FOR_PIPELINE;
                 end if;
             
             when GIVE_TO_AXI =>
@@ -173,23 +179,24 @@ begin
                     end if;
                     cases_out_count_prev := cases_out_count;
                 end if;
-                
-                if cases_out_count = cases_in_count then
-                    axi_out_state_nxt <= FINISHED_OUT;
-                end if;
-    
+          
                 ipo <= '1';
                 if ili = '0' then
                     cases_out_count := cases_out_count + 1;
                     axi_out_state_nxt <= WAIT_FOR_PIPELINE;                
                 end if;
                 
+                if cases_out_count = cases_in_count and axi_in_state = FINISHED_IN then
+                    axi_out_state_nxt <= FINISHED_OUT;
+                end if;     
+            
             when FINISHED_OUT =>
                 report " " severity note;  -- Add a blank line before
                 report "All messages received out" severity note;  -- Add a blank line before
                 report " " severity note;  -- Add a blank line before
                 report "Test summary: " & integer'image(pass_count) & " cases passed, " & integer'image(fail_count) & " cases failed." severity note; 
                 report " " severity note;  -- Add a blank line after
+                rsm_tester_finished <= '1';
                 
             when others =>
         end case;
@@ -200,6 +207,14 @@ begin
         if (clk'event and clk='1') then
             axi_in_state <= axi_in_state_nxt;
             axi_out_state <= axi_out_state_nxt;
+        end if;
+        if(rst_tester = '1') then
+            axi_in_state <= WAIT_FOR_START;
+            axi_out_state <= WAIT_FOR_PIPELINE;
+
+            cases_in_count := 1;
+            cases_out_count := 1;
+            cases_out_count_prev := 0; 
         end if;
     end process fsm_seq;
 end rtl;

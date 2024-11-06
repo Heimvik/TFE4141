@@ -6,7 +6,7 @@ use ieee.std_logic_textio.all;
 
 use work.tb_utils.all;
 
-entity rsa_pipeline_tb is
+entity rsa_tb is
     generic(
         c_block_size : integer := 256;
         log2_c_block_size : integer := 8;
@@ -17,17 +17,12 @@ entity rsa_pipeline_tb is
         num_status_bits : integer := 32;
         CLK_PERIOD : time := 1 ns        
     );
-end rsa_pipeline_tb;
+end rsa_tb;
 
-architecture rtl of rsa_pipeline_tb is    
+architecture rtl of rsa_tb is    
     
     --Upper level control of testbench
     signal clk : std_logic;
-    
-    type t_state is (TESTING_BM,TESTING_RSM,TESTING_RSM_PIPELINE_FINISHED);
-    signal test_state : t_state := TESTING_BM;
-    signal input : std_logic_vector (c_block_size-1 downto 0);
-    signal output : std_logic_vector (c_block_size-1 downto 0);
     
     --Spesifics of the BM
     signal rst_bm : std_logic;
@@ -39,8 +34,13 @@ architecture rtl of rsa_pipeline_tb is
     
     
     --Spesifics of the rsm_tester
-    signal rsm_tester_en : std_logic := '0';
-    signal rst : std_logic;
+    type rsm_t is (RSM,RSM_PIPELINE);
+    signal rsm_dut : rsm_t := RSM;
+    signal rst_tester : std_logic := '0';
+    signal rsm_tester_start : std_logic := '0';
+    signal rsm_tester_finished : std_logic;
+    
+    signal rst_rsm_dut : std_logic;
     
     signal ili : std_logic;
     signal ipi : std_logic;
@@ -79,6 +79,7 @@ architecture rtl of rsa_pipeline_tb is
     signal n_bm : std_logic_vector (c_block_size+1 downto 0);
     signal e : std_logic_vector (c_block_size-1 downto 0);
     
+    
 begin
     --Clock generation
     clk_gen : process is
@@ -114,7 +115,7 @@ begin
     );
         
     
-    DUT_RSM : entity work.rsa_stage_module
+    DUT_RSM : entity work.rsa_core_pipeline
     generic map(
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
@@ -124,7 +125,7 @@ begin
     )
     port map(
         CLK => clk,
-        RST => not rst_rsm,
+        RST_N => not rst_rsm,
         
         ILI => ilo_rsm,
         IPO => ipi_rsm,
@@ -132,7 +133,7 @@ begin
         IPI => ipo_rsm,
         
         N => n,
-        ES => e,
+        E => e,
 
         DPI => dpo_rsm,
         DCI => std_logic_vector(to_unsigned(1, c_block_size)),
@@ -180,10 +181,12 @@ begin
         log2_es_size => log2_es_size
     )
     port map(
-        tester_en => rsm_tester_en,
+        rsm_tester_start => rsm_tester_start,
+        rsm_tester_finished => rsm_tester_finished,
         
         clk => clk,
-        rst => rst,
+        rst_tester => rst_tester,
+        rst_dut => rst_rsm_dut,
         
         --Control signals             
         ili => ili,
@@ -198,8 +201,64 @@ begin
         n => n,
         e => e
     );
-
+    
+    distribute_rsm_signals : process(rsm_dut,ili_rsm,ipi_rsm,ili_rsm_pipeline,ipi_rsm_pipeline,ipo,ilo,dpo,dci_rsm,dci_rsm_pipeline,rst_rsm_dut) is
+    begin    
+        case(rsm_dut) is
+            when RSM =>
+                rst_rsm <= rst_rsm_dut;
+                ili <= ili_rsm;
+                ipi <= ipi_rsm;
+                ipo_rsm <= ipo;
+                ilo_rsm <= ilo;
                 
+                dpo_rsm <= dpo;
+                dci <= dci_rsm;
+                
+            when RSM_PIPELINE =>
+                rst_rsm_pipeline <= rst_rsm_dut;
+                ili <= ili_rsm_pipeline;
+                ipi <= ipi_rsm_pipeline;
+                ipo_rsm_pipeline <= ipo;
+                ilo_rsm_pipeline <= ilo;
+                
+                dpo_rsm_pipeline <= dpo;
+                dci <= dci_rsm_pipeline;
+        end case;
+    end process distribute_rsm_signals;
+    
+    testbench_control : process is
+    begin
+        --Control of BM_STAGE_MODULE
+        wait for 10*CLK_PERIOD;
+    
+        rsm_dut <= RSM;
+        assert false
+        report "**********************************Starting test of 1-stage RSM alone**********************************"
+        severity note;
+        rsm_tester_start <= '1';
+        wait until rsm_tester_finished = '1';
+        rsm_tester_start <= '0';
+        
+        rst_tester <= '1';
+        wait for 1*CLK_PERIOD;
+        rst_tester <= '0';
+        
+        wait for 10*CLK_PERIOD;
+        
+        rsm_dut <= RSM_PIPELINE;
+        assert false
+        report "**********************************Starting test of 16-stage RSM pipeline**********************************"
+        severity note;
+        rsm_tester_start <= '1';
+        wait until rsm_tester_finished = '1';
+        rsm_tester_start <= '0';
+        
+        rst_tester <= '1';
+        wait for 1*CLK_PERIOD;
+        rst_tester <= '0';
+        
+    end process testbench_control;
 end rtl;
         
     

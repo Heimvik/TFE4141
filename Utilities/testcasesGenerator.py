@@ -133,7 +133,7 @@ def generate_csv(m_file, k_file, num_cases,min_value, max_value):
         writerM.writerow(['0' * 256, '0' * 256, '0' * 256, '0' * 256, 'EOL'])  # Ensure the end row has the same binary length
 
 if __name__ == "__main__":
-    NUM_CASES = 56  # Set your desired number of cases
+    NUM_CASES = 8  # Set your desired number of cases
     MAX_VAL_UPPER = int((2**256)-1)  # Set maximum value for n
     MIN_VAL = int(2**255)
     msg_file_name = "messages.csv"

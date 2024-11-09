@@ -1,0 +1,92 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "7e18b03f-0dd8-4430-9873-65919f4f0c9c")
+	(paper "A4")
+	(title_block
+		(title "Microarchitecture")
+	)
+	(lib_symbols)
+	(sheet
+		(at 101.6 68.58)
+		(size 58.42 54.61)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "21c2d8ae-34c8-4eeb-a025-0344b2d7e18d")
+		(property "Sheetname" "RSA_MODULE"
+			(at 101.6 67.8684 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "RSA.kicad_sch"
+			(at 101.6 123.7746 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Microarchitecture"
+				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 58.42 68.58)
+		(size 24.13 54.61)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "5b729730-b902-4f74-8373-bf47ad25ccef")
+		(property "Sheetname" "AXI_MODULE"
+			(at 58.42 67.8684 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "AXI.kicad_sch"
+			(at 58.42 123.7746 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "Microarchitecture"
+				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)

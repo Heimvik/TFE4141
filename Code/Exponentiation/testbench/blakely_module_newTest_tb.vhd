@@ -97,7 +97,7 @@ begin
         variable expected_R : std_logic_vector(c_block_size-1 downto 0);
     begin
         --Open csv file for reading
-        file_open(csv_file, "/Users/Eier/Documents/NTNU/7Semester_Elsys/DDS1/Prosjekt/TFE4141_Design_of_digital_systems/blakeley_module_test_cases.csv", READ_MODE);
+        file_open(csv_file, "/Users/Eier/Documents/NTNU/7Semester_Elsys/DDS1/Prosjekt/TFE4141_Design_of_digital_systems/blakeleymoduletestcases.csv", READ_MODE);
         if not endfile(csv_file) then
             report "File opened successfully." severity note;
         else
@@ -131,6 +131,7 @@ begin
             wait for clk_period;
             ABVAL <= '1';
             wait until RVAL = '1';
+            wait for clk_period;
             if(R = expected_R) then
                 pass_count := pass_count + 1;
                 report("Test case " & integer'image(test_case_index) & " passed") severity note;

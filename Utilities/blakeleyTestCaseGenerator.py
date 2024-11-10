@@ -42,8 +42,8 @@ def generate_csv(file_name, num_cases, max_value):
         writer.writerow(['0' * 256, '0' * 256, '0' * 256, '0' * 256, 'EOL'])
 
 if __name__ == "__main__":
-    NUM_CASES = 1  # Set the desired number of test cases
+    NUM_CASES = 100  # Set the desired number of test cases
     MAX_VAL = (2 ** 256) - 1  # Set maximum value for A, B, N
-    csv_file_name = "blakeley_module_test_cases.csv"
+    csv_file_name = "blakeleymoduletestcases.csv"
 
     generate_csv(csv_file_name, NUM_CASES, MAX_VAL)

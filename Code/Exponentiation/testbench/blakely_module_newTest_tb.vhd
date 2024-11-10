@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.numeric_std.all;
+use IEEE.numeric_std.ALL;
 use STD.textio.all;
 use ieee.std_logic_textio.all;
 
@@ -9,25 +9,32 @@ use work.blakeley_utils.all;
 
 entity blakely_module_newtest_tb is
     generic (
-		c_block_size : integer := 256;
+        c_block_size : integer := 256;
         num_status_bits : integer := 32
+    );
+    port (
+        trigger : in  std_logic;  -- FSM start signal
+        finished: out std_logic   -- FSM completion signal
     );
 end blakely_module_newtest_tb;
 
 architecture rtl of blakely_module_newtest_tb is
-    signal A : std_logic_vector (c_block_size-1 downto 0);
-    signal B : std_logic_vector (c_block_size-1 downto 0);
-    signal N : std_logic_vector (c_block_size+1 downto 0);--Might be + 1 TODO?
-    signal ABVAL : std_logic; --Starts the operation?
-    signal R : std_logic_vector (c_block_size-1 downto 0);--Result
-    signal RVAL : std_logic;--Result valid?
-           
-    signal clk : std_logic;
-    signal rst : std_logic;
+    signal A : std_logic_vector(c_block_size-1 downto 0);
+    signal B : std_logic_vector(c_block_size-1 downto 0);
+    signal N : std_logic_vector(c_block_size+1 downto 0);
+    signal ABVAL : std_logic; 
+    signal R : std_logic_vector(c_block_size-1 downto 0);
+    signal RVAL : std_logic;
+    signal clk : std_logic := '0'; -- Internal clock
+    signal rst : std_logic := '0'; -- Internal reset
+
+    type state_t is (IDLE, TESTING);
+    signal state, next_state : state_t := IDLE;
     
     signal blakeley_status : std_logic_vector(num_status_bits-1 downto 0);
     
     constant clk_period : time := 2 ns;
+
 
     --File handling
     file csv_file : text;
@@ -77,16 +84,37 @@ begin
             clk <= '1';
             wait for clk_period / 2;
         end loop;
-    end process clk_gen;
+   end process clk_gen;
 
-     -- Add the reset process here
-     reset_process: process
-     begin
-         rst <= '1';
-         wait for 10 * clk_period;  -- Hold reset active for a few clock cycles
-         rst <= '0';  -- Deactivate reset
-         wait;
-     end process reset_process;
+    -- FSM Process for state transitions
+    fsm_process: process(clk, rst)
+    begin
+        if rst = '1' then
+            state <= IDLE;
+        elsif rising_edge(clk) then
+            state <= next_state;
+        end if;
+    end process fsm_process;
+
+    -- Process to determine next state
+    next_state_logic: process(state, trigger)
+    begin
+        case state is
+            when IDLE =>
+                if trigger = '1' then
+                    next_state <= TESTING;
+                else
+                    next_state <= IDLE;
+                end if;
+            
+            when TESTING =>
+                if trigger = '0' then
+                    next_state <= IDLE;
+                else
+                    next_state <= TESTING;
+                end if;
+        end case;
+    end process next_state_logic;
 
     stimulus: process
         variable current_line : line;
@@ -96,15 +124,23 @@ begin
         variable comma : character := ',';
         variable expected_R : std_logic_vector(c_block_size-1 downto 0);
     begin
-        --Open csv file for reading
-        file_open(csv_file, "/Users/Eier/Documents/NTNU/7Semester_Elsys/DDS1/Prosjekt/TFE4141_Design_of_digital_systems/blakeleymoduletestcases.csv", READ_MODE);
+        -- Apply reset
+        rst <= '1';
+        wait for 10 * clk_period;
+        rst <= '0';
+        
+        -- Wait in IDLE state until trigger is set
+        wait until state = TESTING;
+        
+        -- Open CSV file for reading
+        file_open(csv_file, "C:\Users\Andreas\Desktop\alphaterst2\TFE4141_Design_of_digital_systems\bmtc.csv", READ_MODE);
         if not endfile(csv_file) then
             report "File opened successfully." severity note;
         else
             report "Failed to open file or file is empty." severity error;
         end if;
 
-        while not endfile(csv_file)loop
+        while not endfile(csv_file) loop
             readline(csv_file, current_line);
              -- Read sections from the line and skip commas
             read(current_line, current_case_A);
@@ -145,6 +181,7 @@ begin
         end loop;
         file_close(csv_file);
         report "Test completed. " & integer'image(pass_count) & " cases passed, " & integer'image(fail_count) & " cases failed." severity note;
+        finished <= '1';
     wait;
     end process stimulus;
 end architecture rtl;

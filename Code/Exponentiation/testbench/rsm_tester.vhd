@@ -75,7 +75,7 @@ begin
         
         variable comma : character;
     begin
-        file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Utilities\key.csv",READ_MODE);
+        file_open(csv_file,"C:\Users\Andreas\Desktop\alpha_test\forsok5\TFE4141_Design_of_digital_systems\Utilities\key.csv",READ_MODE);
         readline(csv_file,current_line);
         read(current_line,current_case_e);
         read(current_line,comma);
@@ -111,7 +111,7 @@ begin
                 rst_dut <= '0';
                 
                 if not file_opened then
-                    file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Utilities\messages.csv",READ_MODE);
+                    file_open(csv_file,"C:\Users\Andreas\Desktop\alpha_test\forsok5\TFE4141_Design_of_digital_systems\Utilities\messages.csv",READ_MODE);
                     file_opened := true;
                 end if;
                 

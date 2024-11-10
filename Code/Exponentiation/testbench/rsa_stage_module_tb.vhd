@@ -230,8 +230,9 @@ begin
     testbench_control : process is
     begin
         --Control of BM_STAGE_MODULE
+
+        --Start the blackely module tb 
         wait for 10*CLK_PERIOD;
-    
         rsm_dut <= RSM;
         assert false
         report "**********************************Starting test of 1-stage RSM alone**********************************"

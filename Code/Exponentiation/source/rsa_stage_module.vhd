@@ -37,8 +37,6 @@ end rsa_stage_module;
 
 
 architecture rtl of rsa_stage_module is
-    --Internal singnals
-    --Extended by one bit to enable no overflow when doing sll 1 in blakeley module
     signal n_extended : std_logic_vector(c_block_size+1 downto 0);
     
     signal c_mux_ctl : std_logic;

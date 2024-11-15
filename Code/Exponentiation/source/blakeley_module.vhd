@@ -27,8 +27,6 @@ entity blakeley_module is
            ABVAL : in std_logic;
            R : out std_logic_vector (c_block_size-1 downto 0);
            RVAL : out std_logic
-           
-           --blakeley_status : out std_logic_vector(num_upper_status_bits-1 downto 0)
     );
 end blakeley_module;
 
@@ -38,19 +36,13 @@ architecture rtl of blakeley_module is
     signal add_out_clk_en : std_logic;
     signal add_out_rst : std_logic;
 
-    --Temporary solution while debugging (remove _internal when finished)
+    --_internals to map between corol and datapath
     signal sum_out_internal : std_logic_vector(c_block_size+1 downto 0);    
     signal ainc_out_internal : std_logic_vector(log2_c_block_size-1 downto 0);
-    
     signal mux_ctl_internal : unsigned(1 downto 0);
     
-    --signal control_status : std_logic_vector(num_lower_status_bits-1 downto 0);
-    --signal datapath_status : std_logic_vector(num_lower_status_bits-1 downto 0);
-    
-    
 begin
-    --blakeley_status <= datapath_status or control_status;
-
+    --Instantiate the datapath
     datapath: entity work.blakeley_module_datapath
         generic map(
             c_block_size => c_block_size,
@@ -74,9 +66,9 @@ begin
             ainc_out => ainc_out_internal,
             
             mux_ctl => mux_ctl_internal
-            
-            --datapath_status => datapath_status
         );
+        
+    --Instantiate the control
     control : entity work.blakeley_module_control
         generic map(
             c_block_size => c_block_size,
@@ -100,7 +92,5 @@ begin
             ainc_out => ainc_out_internal,
  
             mux_ctl => mux_ctl_internal
-
-            --control_status => control_status
         );
 end rtl;

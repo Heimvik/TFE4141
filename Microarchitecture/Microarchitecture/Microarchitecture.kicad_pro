@@ -397,7 +397,7 @@
     ],
     [
       "d24df161-92da-4d3c-8ec4-b2b340dd12b4",
-      "RSA_STAGE_MODULE"
+      "RSA_STAGE_MODULE1"
     ],
     [
       "ad025e36-342f-446b-9268-b4da1d9623a9",
@@ -409,26 +409,14 @@
     ],
     [
       "13dcc967-34b6-4992-aa6e-12cd2f23cead",
-      "AXI_TRANSMIT_MODULE"
+      "AXI_OUT"
     ],
     [
       "2a3bc4e3-7612-4120-a955-4baebcb77498",
-      "AXI_RECEIVE_MODULE"
+      "AXI_IN"
     ],
     [
       "5c7540d9-7028-48a5-955b-0e835a2154cd",
-      "RSA_STAGE_MODULE1"
-    ],
-    [
-      "49cf7aed-c9dc-43e0-9dd4-664fc1390d76",
-      "BLAKELEY_MODULE1"
-    ],
-    [
-      "ad025e36-342f-446b-9268-b4da1d9623a9",
-      "BLAKELEY_MODULE_REV3"
-    ],
-    [
-      "2ff9fb5f-e895-4ed8-9926-01fc2395a11b",
       "RSA_STAGE_MODULE2"
     ],
     [
@@ -440,12 +428,40 @@
       "BLAKELEY_MODULE_REV3"
     ],
     [
+      "e302ed0c-39da-421e-9623-874dea47c4a1",
+      "RSA_STAGE_MODULE3"
+    ],
+    [
+      "ad025e36-342f-446b-9268-b4da1d9623a9",
+      "BLAKELEY_MODULE_REV3"
+    ],
+    [
       "74ab4954-1e97-4242-bf78-d915d78f9b4b",
       "BLAKELEY_MODULE_REV2"
     ],
     [
       "74ab4954-1e97-4242-bf78-d915d78f9b4b",
       "BLAKELEY_MODULE_REV2"
+    ],
+    [
+      "49cf7aed-c9dc-43e0-9dd4-664fc1390d76",
+      "BLAKELEY_MODULE1"
+    ],
+    [
+      "e99a11b0-1092-4064-b05e-d34c79915b42",
+      "RSA_STAGE_MODULE8"
+    ],
+    [
+      "ad025e36-342f-446b-9268-b4da1d9623a9",
+      "BLAKELEY_MODULE_REV3"
+    ],
+    [
+      "74ab4954-1e97-4242-bf78-d915d78f9b4b",
+      "BLAKELEY_MODULE_REV2"
+    ],
+    [
+      "49cf7aed-c9dc-43e0-9dd4-664fc1390d76",
+      "BLAKELEY_MODULE1"
     ],
     [
       "74ab4954-1e97-4242-bf78-d915d78f9b4b",

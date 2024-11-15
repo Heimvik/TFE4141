@@ -24,8 +24,8 @@ entity rsa_core is
         c_block_size : integer  := 256;
         
         --To change the number of cores, change BOTH:
-        num_pipeline_stages : integer := 1;
-        log2_es_size : integer := 8;        --HAS to be the result of log2(c_block_size/num_pipeline_stages)
+        num_pipeline_stages : integer := 8;
+        log2_es_size : integer := 5;        --HAS to be the result of log2(c_block_size/num_pipeline_stages)
         
         log2_c_block_size : integer := 8;
         log2_max_message_count : integer := 16;

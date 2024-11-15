@@ -5,4 +5,64 @@
 	(uuid "63378cbf-f880-4b48-b575-ce987fb59d25")
 	(paper "A4")
 	(lib_symbols)
+	(hierarchical_label "MSGOUT_READY"
+		(shape input)
+		(at 163.83 88.9 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1d6c025a-d691-4dd4-ad9d-8a8223d39a8c")
+	)
+	(hierarchical_label "IPI"
+		(shape input)
+		(at 139.7 88.9 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4882a66a-2b08-4985-b5a7-01ee977481de")
+	)
+	(hierarchical_label "IPO"
+		(shape output)
+		(at 139.7 86.36 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "809cdbde-be42-4083-94f6-f630c8872641")
+	)
+	(hierarchical_label "MSGOUT_VALID"
+		(shape output)
+		(at 163.83 86.36 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "835cf5e8-ff87-4e60-9cbd-0ebfff9688cd")
+	)
+	(hierarchical_label "MSGOUT_LAST"
+		(shape output)
+		(at 163.83 91.44 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "cb6f277f-d5a5-4a72-b8d7-a0389d43edaa")
+	)
 )

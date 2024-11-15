@@ -88,7 +88,7 @@ architecture rtl of rsa_core is
 
     --States
     type ai_state is (GET_FROM_AXI,HOLD_FOR_PIPELINE);
-    type ao_state is (WAIT_FOR_PIPELINE,GIVE_TO_AXI,DELAY_MSGOUT_VALID,SIGNAL_PIPELINE);
+    type ao_state is (WAIT_FOR_PIPELINE,GIVE_TO_AXI,SIGNAL_PIPELINE);
     signal axi_in_state : ai_state := GET_FROM_AXI;
     signal axi_in_state_nxt : ai_state := GET_FROM_AXI;
     signal axi_out_state : ao_state := WAIT_FOR_PIPELINE;
@@ -210,6 +210,7 @@ begin
     
     --Iterface to AXI output stream
     axi_out : process(clk,ili,axi_out_state,msgout_ready,message_counter_out,message_counter_target,message_counter_target_rd_ptr) is
+        variable hasTransfered : boolean := false;
     begin
         message_counter_target_rd_ptr_nxt <= message_counter_target_rd_ptr;
         message_counter_out_nxt <= message_counter_out;
@@ -223,6 +224,7 @@ begin
                 
                 if ili = '1' then
                     message_counter_out_nxt <= message_counter_out + 1;
+                    hasTransfered := false;
                     axi_out_state_nxt <= GIVE_TO_AXI;
                 else
                     axi_out_state_nxt <= WAIT_FOR_PIPELINE;
@@ -237,24 +239,15 @@ begin
                     msgout_last <= '0';
                 end if;
                 
-                if msgout_ready = '1' then
-                    axi_out_state_nxt <= DELAY_MSGOUT_VALID;
+                if msgout_ready = '1' and clk'event and clk='1' then
+                    hasTransfered := true;
+                end if;
+                
+                if hasTransfered then
+                    axi_out_state_nxt <= SIGNAL_PIPELINE;
                 else
                     axi_out_state_nxt <= GIVE_TO_AXI;
                 end if;
-                
-            when DELAY_MSGOUT_VALID =>
-                ipo <= '0';
-                msgout_valid <= '1';
-                if message_counter_out = message_counter_target(message_counter_target_rd_ptr) then
-                    msgout_last <= '1';
-                else
-                    msgout_last <= '0';
-                end if;
-                if(clk'event and clk='0') then
-                    msgout_valid <= '0';
-                end if;
-                axi_out_state_nxt <= SIGNAL_PIPELINE;
                              
             when SIGNAL_PIPELINE =>
                 ipo <= '1';
@@ -278,13 +271,15 @@ begin
     begin
         if (clk'event and clk='1') then
             axi_in_state <= axi_in_state_nxt;
-            axi_out_state <= axi_out_state_nxt;
             
             message_counter_target <= message_counter_target_nxt;
             message_counter_in <= message_counter_in_nxt;
             message_counter_target_wr_ptr <= message_counter_target_wr_ptr_nxt;
             message_counter_out <= message_counter_out_nxt;
             message_counter_target_rd_ptr <= message_counter_target_rd_ptr_nxt;
+        end if;
+        if (clk'event and clk='0') then
+            axi_out_state <= axi_out_state_nxt;
         end if;
     end process fsm_seq;
 end rtl;

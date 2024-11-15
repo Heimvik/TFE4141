@@ -75,7 +75,8 @@ begin
     ainc_nxt <= ainc + to_unsigned(1,log2_c_block_size);
     sum_out <= std_logic_vector(add_out);
     ainc_out <= std_logic_vector(ainc);
-        
+    
+    --Select the whole b, only if we got a '1' bit in the current position in a, using ainc to iterate from MSB to LSB
     sel_a_comb : process (a,b,ainc) is
     begin
         if a((c_block_size-1)- to_integer(ainc)) = '1' then
@@ -85,16 +86,21 @@ begin
         end if;
     end process sel_a_comb;
     
-    shift_out <= resize(r_out,shift_out'length) sll 1; --NBNB: Experimental verion! Before: r_out sll 1;
+    --Multiply the current r by 2
+    shift_out <= resize(r_out,shift_out'length) sll 1;
+    
+    --Do the addition of the current r and the result from the potential b
     add_out_nxt <= resize(mul_out,add_out_nxt'length) + shift_out;
     
+    --As the addition are limited to 3(n-1), two subractions are needed at most
     sub0 <= add_out;
     sub1 <= add_out - unsigned(n);
-    sub2 <= add_out - (unsigned(n) sll 1); --Optimization here avalibale by changing mapping of n
+    sub2 <= add_out - (unsigned(n) sll 1);
     
+    --Select the correct subtraction, based of the result of add_out compared to the modulus n
     sel_sub_comb : process(mux_ctl, sub0, sub1, sub2) is
     begin
-        r_out <= sub0(c_block_size-1 downto 0);
+        --r_out <= sub0(c_block_size-1 downto 0);
         case(to_integer(mux_ctl)) is
             when 0 =>
                 r_out <= sub0(c_block_size-1 downto 0);

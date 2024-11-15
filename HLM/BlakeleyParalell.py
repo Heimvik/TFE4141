@@ -3,8 +3,8 @@ import time
 import csv
 import queue
 
-PIPELINE_STAGES = 8 #Set dependent of PPA in final implementation
-KEY_LENGTH = 64 #Shuld be 256 in final implemntation
+NUM_PIPELINE_STAGES = 8 #Set dependent of PPA in final implementation
+KEY_LENGTH = 64 #Should be 256 in final implemntation
 
 E = 8954    ## Encryption key
 N = 25553    ## Modulus
@@ -23,10 +23,10 @@ pipelinentermediates holds:
     [1] - Intermediate P after stage ID-1
     [2] - Keeps the message ID
 '''
-pipelineIntermediates = [[queue.Queue() for _ in range(3)] for _ in range(PIPELINE_STAGES+2)]
-intermediatesLoaded = [threading.Semaphore(0) for _ in range(PIPELINE_STAGES+2)]
-intermediatesPopped = [threading.Semaphore(1) for _ in range(PIPELINE_STAGES+2)]
-intermediateMtx = [threading.Lock() for _ in range(PIPELINE_STAGES+2)]
+pipelineIntermediates = [[queue.Queue() for _ in range(3)] for _ in range(NUM_PIPELINE_STAGES+2)]
+intermediatesLoaded = [threading.Semaphore(0) for _ in range(NUM_PIPELINE_STAGES+2)]
+intermediatesPopped = [threading.Semaphore(1) for _ in range(NUM_PIPELINE_STAGES+2)]
+intermediateMtx = [threading.Lock() for _ in range(NUM_PIPELINE_STAGES+2)]
 
 requestNewCase = threading.Semaphore(0)
 grantNewCase = threading.Semaphore(0)
@@ -89,12 +89,12 @@ def reportProgress():
     
     for stageID, messageID, currentC, currentP in pipelineLog:
         if messageID not in progression:
-            progression[messageID] = [''] * (PIPELINE_STAGES + 1) 
+            progression[messageID] = [''] * (NUM_PIPELINE_STAGES + 1) 
         progression[messageID][stageID] = f"C: {currentC}, P: {currentP}" 
     
     # Print the header
     print("\n--- Pipeline Progression ---")
-    header = "Message ID | " + " ".join(f"Stage {i if i else ' ':<14}" for i in range(PIPELINE_STAGES + 1))
+    header = "Message ID | " + " ".join(f"Stage {i if i else ' ':<14}" for i in range(NUM_PIPELINE_STAGES + 1))
     print(header)
     print("-" * len(header))
 
@@ -113,22 +113,22 @@ def getQueueElement(q):
         return ""  # Return 'Empty' if the queue is empty
 
 
-def blakelyMulMod(a, b, n):
+def blakeley_module(a, b, n):
     R = 0
     a_bin = bin(a)[2:][::-1]
     for i in range(len(a_bin)):
         bit = int(a_bin[(len(a_bin)-1)-i])  
-        shift = R<<1                    ## Parelell B
-        mul = bit * b                   ## Paralell B
+        shift = R<<1                    
+        mul = bit * b                   
         R = mul + shift                 
-        if R>n:
+        if R>=n:
             R = R - n
-        if R>n:
+        if R>=n:
             R = R - n
     return R
 
 
-def blakeleyPipelineStart(stageID):
+def axi_in(stageID):
     while(True):
         ## Request the pipeline controller a new case
         requestNewCase.release()
@@ -152,7 +152,7 @@ def blakeleyPipelineStart(stageID):
         ## Signal to next stage that data is ready
         intermediatesLoaded[stageID].release()
 
-def blakeleyPipelineStage(eSlice,n,stageID):
+def rsa_stage_module(eSlice,n,stageID):
     while(True):
         ## Wait for asynch signal from previous stage that data is ready
         intermediatesLoaded[stageID-1].acquire()
@@ -172,19 +172,19 @@ def blakeleyPipelineStage(eSlice,n,stageID):
         pipelineLogMtx.release()
 
         ## Accumulate new values
-        if KEY_LENGTH % PIPELINE_STAGES != 0:
-            print(f"Error: KEY_LENGTH / PIPELINE_STAGES is not an integer")
+        if KEY_LENGTH % NUM_PIPELINE_STAGES != 0:
+            print(f"Error: KEY_LENGTH / NUM_PIPELINE_STAGES is not an integer")
             raise ValueError
 
-        if len(bin(eSlice)[2:]) > (KEY_LENGTH/PIPELINE_STAGES):
-            print(f"Error: eSlice is {eSlice} and not KEY_LENGTH/PIPELINE_STAGES")
+        if len(bin(eSlice)[2:]) > (KEY_LENGTH/NUM_PIPELINE_STAGES):
+            print(f"Error: eSlice is {eSlice} and not KEY_LENGTH/NUM_PIPELINE_STAGES")
             raise ValueError
         
         mask = 0b1
-        for i in range(0, int(KEY_LENGTH/PIPELINE_STAGES)):
+        for i in range(0, int(KEY_LENGTH/NUM_PIPELINE_STAGES)):
             if eSlice & mask:
-                currentC = blakelyMulMod(currentC, currentP, n)
-            currentP = blakelyMulMod(currentP, currentP, n)
+                currentC = blakeley_module(currentC, currentP, n)
+            currentP = blakeley_module(currentP, currentP, n)
             mask = mask << 1
 
         ## Wait for asynch signal from next stage that it has popped off the previous values in time
@@ -200,7 +200,7 @@ def blakeleyPipelineStage(eSlice,n,stageID):
         ## Signal to next stage that data is ready
         intermediatesLoaded[stageID].release()
 
-def blakeleyPipelineEnd(stageID):
+def axi_out(stageID):
     while(True):
         ## Wait for asynch signal from previous stage that data is ready
         intermediatesLoaded[stageID-1].acquire()
@@ -221,7 +221,7 @@ def blakeleyPipelineEnd(stageID):
             print("Last case out of the pipeline, signaled controller.")
             pipelineFinished.release()
 
-def blakeleyPipelineController():
+def rsa_core_control():
     while(True):
         requestNewCase.acquire()
         caseMtx.acquire()
@@ -235,7 +235,7 @@ def blakeleyPipelineController():
         caseMtx.release()
         grantNewCase.release()
 
-def paralellBinartExp():
+def rsa_core():
 
     ## Load all test cases that simulate the stream of M
     global cases
@@ -243,14 +243,14 @@ def paralellBinartExp():
     global numCases
     numCases = cases.qsize()
 
-    eSlices = splitE(E, KEY_LENGTH, PIPELINE_STAGES)
+    eSlices = splitE(E, KEY_LENGTH, NUM_PIPELINE_STAGES)
     ## Start all threads and asynchromus communication (semaphores)
     threads = []
-    threads.append(threading.Thread(target=blakeleyPipelineController))
-    threads.append(threading.Thread(target=blakeleyPipelineStart, args=(0,)))
-    for i in range(1,PIPELINE_STAGES+1):
-        threads.append(threading.Thread(target=blakeleyPipelineStage, args=(eSlices[i-1],N,i)))
-    threads.append(threading.Thread(target=blakeleyPipelineEnd, args=(PIPELINE_STAGES+1,)))
+    threads.append(threading.Thread(target=rsa_core_control))
+    threads.append(threading.Thread(target=axi_in, args=(0,)))
+    for i in range(1,NUM_PIPELINE_STAGES+1):
+        threads.append(threading.Thread(target=rsa_stage_module, args=(eSlices[i-1],N,i)))
+    threads.append(threading.Thread(target=axi_out, args=(NUM_PIPELINE_STAGES+1,)))
 
     for thread in threads:
         thread.start()
@@ -259,7 +259,7 @@ def paralellBinartExp():
         thread.join()
 
 def main():
-    paralellBinartExp()
+    rsa_core()
 
 if __name__ == "__main__":
     main()

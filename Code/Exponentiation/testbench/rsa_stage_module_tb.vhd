@@ -26,11 +26,13 @@ architecture rtl of rsa_tb is
     
     --Spesifics of the BM
     signal rst_bm : std_logic;
-    signal a_in_test : std_logic_vector (c_block_size-1 downto 0);
-    signal b_in_test : std_logic_vector (c_block_size-1 downto 0);
-    signal ab_val : std_logic;
-    signal r_out_test : std_logic_vector (c_block_size-1 downto 0);
-    signal r_val : std_logic;
+    signal bm_tester_start : std_logic := '0';
+    signal bm_tester_finished : std_logic;
+    signal a : std_logic_vector (c_block_size-1 downto 0);
+    signal b : std_logic_vector (c_block_size-1 downto 0);
+    signal abval : std_logic;
+    signal r : std_logic_vector (c_block_size-1 downto 0);
+    signal rval : std_logic;
     
     
     --Spesifics of the rsm_tester
@@ -106,12 +108,12 @@ begin
         clk => clk,
         rst => rst_bm,
         
-        A => a_in_test,
-        B => b_in_test,
+        A => a,
+        B => b,
         N => n_bm,
-        ABVAL => ab_val,
-        R => r_out_test,
-        RVAL => r_val
+        ABVAL => abval,
+        R => r,
+        RVAL => rval
     );
         
     
@@ -169,6 +171,27 @@ begin
         DCO => dci_rsm_pipeline,
         
         rsm_status => rsm_pipeline_status
+    );
+    
+    --Standalone test component to test thhe blakeley_module
+    BM_TESTER : entity work.bm_tester
+    generic map(
+        c_block_size => c_block_size
+    )
+    port map (
+        bm_tester_start => bm_tester_start,
+        bm_tester_finished => bm_tester_finished,
+        
+        clk => clk,
+        rst_tester => rst_tester,
+        rst_dut => rst_bm,
+        
+        a => a,
+        b => b,
+        n => n_bm,
+        abval => abval,
+        r => r,
+        rval => rval
     );
     
     --Standalone test component to test both the single RSM and the pipelined RSM
@@ -230,6 +253,17 @@ begin
     testbench_control : process is
     begin
         --Control of BM_STAGE_MODULE
+        assert false
+        report "**********************************Starting test of BM alone**********************************"
+        severity note;
+        bm_tester_start <= '1';
+        wait until bm_tester_finished = '1';
+        bm_tester_start <= '0';
+        
+        rst_tester <= '1';
+        wait for 1*CLK_PERIOD;
+        rst_tester <= '0';
+        
         wait for 10*CLK_PERIOD;
     
         rsm_dut <= RSM;

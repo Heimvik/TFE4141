@@ -55,7 +55,10 @@ begin
     gen_status : process(rsm_status_internals)
     begin
         for i in 1 to num_pipeline_stages loop
+            --Bit 7 in rsm_status_internals is an indication on whether the rsa_stage_module is in state RUN_BM
             rsm_status(i-1) <= rsm_status_internals(i)(7);
+            --Bit 10 in rsm_status_internals is an indication on whether the blakeley_module is in state RUN_CP
+            rsm_status(num_pipeline_stages+(i-1)) <= not rsm_status_internals(i)(10);
         end loop;
     end process gen_status;
 

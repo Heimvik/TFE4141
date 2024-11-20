@@ -79,9 +79,9 @@ begin
     --Select the whole b, only if we got a '1' bit in the current position in a, using ainc to iterate from MSB to LSB
     sel_a_comb : process (a,b,ainc) is
     begin
-        if a((c_block_size-1)- to_integer(ainc)) = '1' then
+        if a(to_integer((c_block_size-1)-ainc)) = '1' then
             mul_out <= unsigned(b);
-        else
+       else
             mul_out <= (others => '0');
         end if;
     end process sel_a_comb;
@@ -92,23 +92,16 @@ begin
     --Do the addition of the current r and the result from the potential b
     add_out_nxt <= resize(mul_out,add_out_nxt'length) + shift_out;
     
-    --As the addition are limited to 3(n-1), two subractions are needed at most
-    sub0 <= add_out;
-    sub1 <= add_out - unsigned(n);
-    sub2 <= add_out - (unsigned(n) sll 1);
-    
-    --Select the correct subtraction, based of the result of add_out compared to the modulus n
-    sel_sub_comb : process(mux_ctl, sub0, sub1, sub2) is
+    --Start experimental sub
+    sel_sub_comb : process(mux_ctl,add_out,n) is
     begin
-        --r_out <= sub0(c_block_size-1 downto 0);
         case(to_integer(mux_ctl)) is
             when 0 =>
-                r_out <= sub0(c_block_size-1 downto 0);
+                r_out <= resize(add_out,r_out'length);
             when 1 =>
-                r_out <= sub1(c_block_size-1 downto 0);
-            when 2 =>
-                r_out <= sub2(c_block_size-1 downto 0);
+                r_out <= resize(add_out - unsigned(n),r_out'length);
             when others =>
+                r_out <= resize(add_out - (unsigned(n) sll 1),r_out'length);
         end case;
     end process sel_sub_comb;
 
@@ -133,7 +126,7 @@ begin
         end if;
         
         if (add_out_rst = '1') then
-            add_out <= to_unsigned(0,C_BLOCK_SIZE+2);
+            add_out <= to_unsigned(0,c_block_size+2);
         end if;
     end process datapath_seq;
 end architecture rtl;

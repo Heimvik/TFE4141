@@ -94,6 +94,9 @@ begin
         control_status(control_offset+p_bm_rval_bit downto control_offset+c_bm_rval_bit) <= p_bm_rval & c_bm_rval;
         control_status(control_offset+es_index_offset+log2_es_size-1 downto control_offset+es_index_offset) <= std_logic_vector(es_index);
         
+        c_reg_rst <= '0';
+        p_reg_rst <= '0';
+        
         case(stage_state) is
             
             --PURPOSE OF STATE:
@@ -137,12 +140,8 @@ begin
                 c_bm_abval <= '0';
                 p_bm_abval <= '0';
                 
-                --Watch the hold time here!
                 c_reg_clk_en <= '1';
                 p_reg_clk_en <= '1';
-                
-                c_reg_rst <= '0';
-                p_reg_rst <= '0';
                 
                 blakeley_module_state_nxt <= RUN_CP;
                 es_index_nxt <= es_index;
@@ -166,9 +165,6 @@ begin
                 c_reg_clk_en <= '0';
                 p_reg_clk_en <= '0';
                 
-                c_reg_rst <= '0';
-                p_reg_rst <= '0';
-                
                 blakeley_module_state_nxt <= RUN_CP;
                 es_index_nxt <= es_index;
                 --To ensure that previous stage has returned to idle, such that coming around again before the previous stage won't pick up the same value
@@ -189,9 +185,6 @@ begin
                 
                 c_mux_ctl <= '1';
                 p_mux_ctl <= '1';
-                
-                c_reg_rst <= '0';
-                p_reg_rst <= '0';
                 
                 case(blakeley_module_state) is
                     
@@ -264,9 +257,6 @@ begin
                 
                 c_reg_clk_en <= '0';
                 p_reg_clk_en <= '0';
-                
-                c_reg_rst <= '0';
-                p_reg_rst <= '0';
                 
                 blakeley_module_state_nxt <= RUN_CP;
                 es_index_nxt <= es_index;

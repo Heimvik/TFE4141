@@ -4,8 +4,8 @@ use IEEE.numeric_std.all;
 
 entity rsa_stage_module_datapath is
     generic(
-        c_block_size : integer := 256;
-        num_status_bits : integer := 32;
+        c_block_size : integer;
+        num_status_bits : integer;
         
         --The various bit position in the status register from the rsa_stage_module
         datapath_offset : integer := 19;

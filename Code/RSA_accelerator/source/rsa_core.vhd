@@ -94,6 +94,11 @@ architecture rtl of rsa_core is
     signal axi_out_state : ao_state := WAIT_FOR_PIPELINE;
     signal axi_out_state_nxt : ao_state := WAIT_FOR_PIPELINE;
 
+    --The signal message_counter_target is a signal axi_in writes message_counter_in to, upon sending testcases to the pipeline at entry message_counter_target_wr_ptr.
+    --Once the msgin_last signal is asserted into axi_in, the write counter is incremetned, making the axi_in to write another entry in the message_counter_target structure.
+    --The message_counter_target is read by the axi_out module at entry message_counter_target_rd_ptr. As the axi_in module constantly lies num_pipeline_stages ahead of the 
+    --axi out module if rd_ptr=wr_ptr, the axi_out read of the message_counter_target will match what the input wrote, only when it is it's last message out. This is what the
+    --assertion of msgout_last is based off.
     type fifo_counter is array (num_pipeline_stages downto 0) of unsigned(log2_max_message_count-1 downto 0);
     signal message_counter_target : fifo_counter;
     signal message_counter_target_nxt : fifo_counter;
@@ -108,6 +113,7 @@ architecture rtl of rsa_core is
     signal message_counter_target_rd_ptr : integer := 0;
     signal message_counter_target_rd_ptr_nxt : integer := 0;
     
+    --Circular increment to realize the fifo increment of the rd_ptr and wr_ptr
     function circular_increment(ptr : integer; max_value : integer) return integer is
     begin
         if ptr >= max_value then
@@ -127,6 +133,9 @@ begin
         message_counter_target_wr_ptr_nxt <= message_counter_target_wr_ptr;
         message_counter_in_nxt <= message_counter_in;
         case axi_in_state is
+            --PURPOSE OF STATE:
+            --Wait for the next message from the axi in stream
+            --Signaling to the first stage that this "virtual" stage (axi_in) has reached its IDLE (ilo = 0)
             when GET_FROM_AXI =>
                 --Signal to next stage that axi_in is entering IDLE and is open for new data
                 ilo <= '0';
@@ -140,6 +149,9 @@ begin
                     axi_in_state_nxt <= GET_FROM_AXI;
                 end if;
             
+            --PURPOSE OF STATE:
+            --Hold the value, now ready on the axi lines, until the first stage has clocked them in.
+            --Done by signaling ilo = '1' then waiting for the ack of ipi = '1'
             when HOLD_FOR_PIPELINE =>
                 --Signal to next stage that data is valid
                 ilo <= '1';
@@ -152,6 +164,10 @@ begin
                         message_counter_target_nxt(message_counter_target_wr_ptr) <= message_counter_in;
                         message_counter_target_wr_ptr_nxt <= circular_increment(message_counter_target_wr_ptr,num_pipeline_stages);
                         message_counter_in_nxt <= to_unsigned(0,log2_max_message_count);
+                    else
+                        --Prevents the axi_out module of reading a previous, incomplete message_counter when wr_ptr = rd_ptr
+                        --The axi_out module can never reach the state of checking message_counter_target, without having incremented its message_counter_out (it has always received a message from the axi when getting here)
+                        message_counter_target_nxt(message_counter_target_wr_ptr) <= to_unsigned(0,log2_max_message_count);
                     end if;
                 else
                     axi_in_state_nxt <= HOLD_FOR_PIPELINE;
@@ -184,8 +200,8 @@ begin
         E => key_e_d,
         
         DPI => msgin_data,
-        DCI => std_logic_vector(to_unsigned(1, c_block_size)),
-        DPO => open,
+        DCI => std_logic_vector(to_unsigned(1, c_block_size)), --The first c has to be 1, see high level model
+        DPO => open,--Value are not in use, see high level model
         DCO => msgout_data,
         
         rsm_status => rsm_status
@@ -209,8 +225,12 @@ begin
         
     begin
         case(axi_out_state) is
+            
+            --PURPOSE OF STATE:
+            --Wait for the last stage in the pipeline to assert its ili, axi_out's ilo. 
+            --Enter the state give_to_axi if avalibale
             when WAIT_FOR_PIPELINE =>
-                --Signal to previous stage that axi_out is ready for new values
+                --Signal to last stage that axi_out is ready for new values
                 ipo <= '0';
                 msgout_valid <= '0';
                 msgout_last <= '0';
@@ -223,6 +243,9 @@ begin
                     message_counter_out_nxt <= message_counter_out;
                     axi_out_state_nxt <= WAIT_FOR_PIPELINE;
                 end if;
+                
+            --PURPOSE OF STATE:
+            --Give the value to axi, done by asserting valid and waiting for the ready signal in return
             when GIVE_TO_AXI =>
                 ipo <= '0';
                 msgout_valid <= '1';
@@ -239,20 +262,22 @@ begin
                 else
                     axi_out_state_nxt <= GIVE_TO_AXI;
                 end if;
-                
+            
+            --PURPOSE OF STATE:
+            --Acknowledge to the last pipeline stage thatthat axi_out don't need its values anymore, done by singnaling ipo=1 (intermidates popped out)
+            --The last stage should acknowledge on that by returning to IDLE, setting ilo=0
             when SIGNAL_PIPELINE =>
                 ipo <= '1';
                 msgout_valid <= '0';
                 msgout_last <= '0';
+                message_counter_out_nxt <= message_counter_out;
+                message_counter_target_rd_ptr_nxt <= message_counter_target_rd_ptr;
                 
-                if message_counter_out = message_counter_target(message_counter_target_rd_ptr) then
-                    message_counter_target_rd_ptr_nxt <= circular_increment(message_counter_target_rd_ptr,num_pipeline_stages);
-                    message_counter_out_nxt <= to_unsigned(0,log2_max_message_count);
-                else
-                    message_counter_target_rd_ptr_nxt <= message_counter_target_rd_ptr;
-                    message_counter_out_nxt <= message_counter_out;
-                end if;
                 if ili = '0' then
+                    if message_counter_out = message_counter_target(message_counter_target_rd_ptr) then
+                        message_counter_out_nxt <= to_unsigned(0,log2_max_message_count);
+                        message_counter_target_rd_ptr_nxt <= circular_increment(message_counter_target_rd_ptr,num_pipeline_stages);
+                    end if;
                     axi_out_state_nxt <= WAIT_FOR_PIPELINE;
                 else
                     axi_out_state_nxt <= SIGNAL_PIPELINE;

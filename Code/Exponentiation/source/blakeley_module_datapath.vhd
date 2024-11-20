@@ -60,14 +60,12 @@ architecture rtl of blakeley_module_datapath is
 
     signal dec_out : std_logic_vector (c_block_size-1 downto 0);
     signal mul_out : unsigned(c_block_size-1 downto 0);
-    signal shift_out : unsigned(c_block_size+1 downto 0);       --NB: To avoid overflow
+    signal shift_out : unsigned(c_block_size+1 downto 0);     --NB: To avoid overflow
     
     signal add_out : unsigned(c_block_size+1 downto 0);       --NB: To avoid overflow
     signal add_out_nxt : unsigned(c_block_size+1 downto 0);   --NB: To avoid overflow
     
-    signal sub0 : unsigned(c_block_size+1 downto 0);
-    signal sub1 : unsigned(c_block_size+1 downto 0);
-    signal sub2 : unsigned(c_block_size+1 downto 0);
+    signal subtrahend : unsigned(c_block_size+1 downto 0) := to_unsigned(0,c_block_size+2);
 begin
     -- Debug lines
     
@@ -93,18 +91,19 @@ begin
     add_out_nxt <= resize(mul_out,add_out_nxt'length) + shift_out;
     
     --Start experimental sub
-    sel_sub_comb : process(mux_ctl,add_out,n) is
+    sel_sub_comb : process(mux_ctl,n) is
     begin
         case(to_integer(mux_ctl)) is
             when 0 =>
-                r_out <= resize(add_out,r_out'length);
+                subtrahend <= to_unsigned(0,c_block_size+2);
             when 1 =>
-                r_out <= resize(add_out - unsigned(n),r_out'length);
+                subtrahend <= unsigned(n);
             when others =>
-                r_out <= resize(add_out - (unsigned(n) sll 1),r_out'length);
+                subtrahend <= unsigned(n) sll 1;
         end case;
     end process sel_sub_comb;
 
+    r_out <= resize(add_out - subtrahend,r_out'length);
     r <= std_logic_vector(r_out);
         
     -- Datapath sequentials

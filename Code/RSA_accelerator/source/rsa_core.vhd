@@ -115,6 +115,9 @@ architecture rtl of rsa_core is
     signal message_counter_target_rd_ptr : integer := 0;
     signal message_counter_target_rd_ptr_nxt : integer := 0;
     
+    --Common values for all stages comupted once here to save luts
+    signal nx1 : std_logic_vector(c_block_size+1 downto 0);
+    signal nx2 : std_logic_vector(c_block_size+1 downto 0);
     signal e_extended : std_logic_vector(e_block_size-1 downto 0);
     
     --Circular increment to realize the fifo increment of the rd_ptr and wr_ptr
@@ -129,6 +132,8 @@ architecture rtl of rsa_core is
 begin
     rsa_status <= std_logic_vector(num_cycles_last_case) & rsm_status(15 downto 0);
     e_extended <= std_logic_vector(resize(unsigned(key_e_d),e_extended'length));
+    nx1 <= std_logic_vector("00" & key_n);
+    nx2 <= std_logic_vector(unsigned(nx1) sll 1);
     
     --Iterface to AXI input stream
     axi_in : process(ipi,axi_in_state,msgin_last,msgin_valid,message_counter_in,message_counter_target,message_counter_target_wr_ptr) is
@@ -203,7 +208,8 @@ begin
         IPO => ipi,
         ILO => ili,
         
-        N => key_n,
+        NX1 => nx1,
+        NX2 => nx2,
         E => e_extended,
         
         DPI => msgin_data,

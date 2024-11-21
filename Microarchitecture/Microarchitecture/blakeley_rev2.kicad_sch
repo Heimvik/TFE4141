@@ -1560,6 +1560,16 @@
 		)
 		(uuid "4ef638fb-43e2-41d5-8058-82cdeb485b57")
 	)
+	(polyline
+		(pts
+			(xy 256.54 36.83) (xy 278.13 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5149558e-7c3e-4932-b709-1946ae07c9f5")
+	)
 	(wire
 		(pts
 			(xy 271.78 31.75) (xy 271.78 44.45)
@@ -3446,6 +3456,18 @@
 			(justify left)
 		)
 		(uuid "2d5da4c9-3e1f-486b-a126-2cf3489c3fdf")
+	)
+	(text "From rsa_stage_module"
+		(exclude_from_sim no)
+		(at 243.078 33.782 0)
+		(effects
+			(font
+				(size 1.778 1.778)
+				(thickness 0.3556)
+				(bold yes)
+			)
+		)
+		(uuid "5c5ea9c0-2d44-4b97-bdae-255972895078")
 	)
 	(text "NOTE1: DECODER\n\nThe decoder has to be implemented inversely. This means that when the decoder gets input\n'0xFF' the decoded output has to be '0x0'. This is to ensure the MSB scanning of the A\nline and the bitwize mul with the whole B. "
 		(exclude_from_sim no)

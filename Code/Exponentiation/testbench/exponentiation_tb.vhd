@@ -12,7 +12,9 @@ entity rsa_tb is
         log2_c_block_size : integer := 8;
         
         num_pipeline_stages : integer := 16;
-        log2_es_size : integer := 4;   --Has to be log2(c_block_size/num_pipeline_stages)
+        e_block_size : integer := 256;         --es_size*num_pipeline_stages     
+        es_size : integer := 16;
+        log2_es_size : integer := 4;  
         
         num_status_bits : integer := 32;
         CLK_PERIOD : time := 1 ns        
@@ -77,12 +79,15 @@ architecture rtl of rsa_tb is
     signal rsm_pipeline_status : std_logic_vector(num_status_bits-1 downto 0);
     
     --Shared modulus and exponent
-    signal n : std_logic_vector (c_block_size-1 downto 0);
-    signal n_bm : std_logic_vector (c_block_size+1 downto 0);
+    signal nx1_rsm : std_logic_vector(c_block_size+1 downto 0);
+    signal nx2_rsm : std_logic_vector(c_block_size+1 downto 0);
+    signal nx1_bm : std_logic_vector (c_block_size+1 downto 0);
+    signal nx2_bm : std_logic_vector (c_block_size+1 downto 0);
     signal e : std_logic_vector (c_block_size-1 downto 0);
     
     
 begin
+    
     --Clock generation
     clk_gen : process is
     begin
@@ -110,7 +115,8 @@ begin
         
         A => a,
         B => b,
-        N => n_bm,
+        NX1 => nx1_bm,
+        NX2 => nx2_bm,
         ABVAL => abval,
         R => r,
         RVAL => rval
@@ -121,8 +127,10 @@ begin
     generic map(
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
-        num_pipeline_stages => 1,
-        log2_es_size => 8,
+        num_pipeline_stages => num_pipeline_stages,
+        e_block_size => e_block_size,
+        es_size => es_size,
+        log2_es_size => log2_es_size,
         num_status_bits => num_status_bits
     )
     port map(
@@ -134,7 +142,8 @@ begin
         ILO => ili_rsm,
         IPI => ipo_rsm,
         
-        N => n,
+        NX1 => nx1_rsm,
+        NX2 => nx2_rsm,
         E => e,
 
         DPI => dpo_rsm,
@@ -149,8 +158,10 @@ begin
     generic map(
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
-        num_pipeline_stages => 16,
-        log2_es_size => 4,
+        num_pipeline_stages => num_pipeline_stages,
+        e_block_size => e_block_size,
+        es_size => es_size,
+        log2_es_size => log2_es_size,
         num_status_bits => num_status_bits
     )
     port map(
@@ -162,7 +173,8 @@ begin
         ILO => ili_rsm_pipeline,
         IPI => ipo_rsm_pipeline,
 
-        N => n,
+        NX1 => nx1_rsm,
+        NX2 => nx2_rsm,
         E => e,
         
         DPI => dpo_rsm_pipeline,
@@ -188,7 +200,8 @@ begin
         
         a => a,
         b => b,
-        n => n_bm,
+        nx1 => nx1_bm,
+        nx2 => nx2_bm,
         abval => abval,
         r => r,
         rval => rval
@@ -221,7 +234,8 @@ begin
         dpo => dpo,
         dci => dci,
 
-        n => n,
+        NX1 => nx1_rsm,
+        NX2 => nx2_rsm,
         e => e
     );
     

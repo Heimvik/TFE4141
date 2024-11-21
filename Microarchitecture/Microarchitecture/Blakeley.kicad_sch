@@ -1168,16 +1168,16 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
-			(property "Reference" "SHIFT"
-				(at 4.064 -0.254 0)
+			(property "Reference" "SHIFT2"
+				(at 3.302 -6.096 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" ""
-				(at 0 0 0)
+			(property "Value" "~"
+				(at 3.81 3.81 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1213,7 +1213,7 @@
 			)
 			(symbol "SHIFT_0_1"
 				(rectangle
-					(start -10.16 2.54)
+					(start -10.16 -1.27)
 					(end 17.78 -7.62)
 					(stroke
 						(width 0)
@@ -5469,7 +5469,7 @@
 		(dnp no)
 		(uuid "4d2a9c79-869a-4683-80bc-126f25de0cdf")
 		(property "Reference" "SHIFT3"
-			(at 339.09 96.774 0)
+			(at 339.598 102.616 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5518,7 +5518,11 @@
 			(uuid "318c756e-659e-4fe5-bd2f-31cc0e9ea415")
 		)
 		(instances
-			(project "Microarchitecture"
+			(project ""
+				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c/21c2d8ae-34c8-4eeb-a025-0344b2d7e18d"
+					(reference "SHIFT2")
+					(unit 1)
+				)
 				(path "/7e18b03f-0dd8-4430-9873-65919f4f0c9c/21c2d8ae-34c8-4eeb-a025-0344b2d7e18d/5c7540d9-7028-48a5-955b-0e835a2154cd/49cf7aed-c9dc-43e0-9dd4-664fc1390d76"
 					(reference "SHIFT3")
 					(unit 1)

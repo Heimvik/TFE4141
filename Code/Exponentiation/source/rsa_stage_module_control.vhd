@@ -203,7 +203,7 @@ begin
                         if c_bm_rval = '1' and p_bm_rval = '1' then
                             c_reg_clk_en <= std_logic(es(to_integer(es_index)));
                             p_reg_clk_en <= '1';
-                            es_index_nxt <= es_index + 1; --Intended to overflow upon reaching max to save LUT
+                            es_index_nxt <= es_index + 1;
                             blakeley_module_state_nxt <= FINISHED_CP;
                         else
                             c_reg_clk_en <= '0';

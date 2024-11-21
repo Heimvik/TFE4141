@@ -33,7 +33,8 @@ entity rsm_tester is
         dpo : out std_logic_vector (c_block_size-1 downto 0);
         dci : in std_logic_vector (c_block_size-1 downto 0);
 
-        n : out std_logic_vector (c_block_size-1 downto 0);
+        nx1 : out std_logic_vector(c_block_size+1 downto 0);
+        nx2 : out std_logic_vector(c_block_size+1 downto 0);
         e : out std_logic_vector (c_block_size-1 downto 0)
     );        
 end rsm_tester;
@@ -41,8 +42,8 @@ end rsm_tester;
 architecture rtl of rsm_tester is        
     type ai_state is (WAIT_FOR_START,GET_FROM_AXI,HOLD_FOR_PIPELINE,FINISHED_IN,PULSE_RST); --Finished are only here in tb
     type ao_state is (WAIT_FOR_PIPELINE,GIVE_TO_AXI,FINISHED_OUT); --Finished are only here in tb
-    signal axi_in_state : ai_state := GET_FROM_AXI;
-    signal axi_in_state_nxt : ai_state := GET_FROM_AXI;
+    signal axi_in_state : ai_state := WAIT_FOR_START;
+    signal axi_in_state_nxt : ai_state := WAIT_FOR_START;
     signal axi_out_state : ao_state := WAIT_FOR_PIPELINE;
     signal axi_out_state_nxt : ao_state := WAIT_FOR_PIPELINE;
         
@@ -53,7 +54,6 @@ architecture rtl of rsm_tester is
     shared variable cases_in_count : integer := 1;
     shared variable cases_out_count : integer := 1;
     shared variable cases_out_count_prev : integer := 0;
-    
 
     function count_ones(vec : std_logic_vector) return integer is
         variable count : integer := 0;
@@ -74,6 +74,7 @@ begin
         variable current_line : line;
         
         variable comma : character;
+        variable nx1_internal : std_logic_vector(c_block_size+1 downto 0);
     begin
         file_open(csv_file,"C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Utilities\tb_utilities\rsm_testcase_gen\key.csv",READ_MODE);
         readline(csv_file,current_line);
@@ -83,7 +84,9 @@ begin
         file_close(csv_file);
         
         e <= current_case_e;
-        n <= current_case_n;
+        nx1_internal := "00" & current_case_n;
+        nx1 <= nx1_internal;
+        nx2 <= std_logic_vector(unsigned(nx1_internal) sll 1);
         wait;
     end process simulate_axi_regio;
     
@@ -96,12 +99,11 @@ begin
         variable comma : character;
         
         variable rst_at_case : std_logic_vector(num_testcases downto 1) := (others => '0');
-
+        
     begin
         case axi_in_state is
             when WAIT_FOR_START =>
                 if(rsm_tester_start = '1') then
-                    
                     axi_in_state_nxt <= GET_FROM_AXI;
                 else
                     axi_in_state_nxt <= WAIT_FOR_START;

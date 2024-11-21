@@ -26,7 +26,8 @@ entity bm_tester is
         r : in std_logic_vector(c_block_size-1 downto 0);
         rval : in std_logic;
         
-        n : out std_logic_vector (c_block_size+1 downto 0)    
+        nx1 : out std_logic_vector (c_block_size+1 downto 0);
+        nx2 : out std_logic_vector (c_block_size+1 downto 0)    
     );
 end bm_tester;
 
@@ -50,7 +51,6 @@ architecture rtl of bm_tester is
         end loop;
         return result;
     end function;
-
 begin    
     -- FSM Process for state transitions
     fsm_process: process(clk, rst_tester)
@@ -89,6 +89,8 @@ begin
         variable test_case_index : integer := 0;
         variable comma : character := ',';
         variable expected_R : std_logic_vector(c_block_size-1 downto 0);
+        
+        variable nx1_internal : std_logic_vector(c_block_size+1 downto 0);
     begin
         -- Apply reset
         rst_dut <= '1';
@@ -96,9 +98,10 @@ begin
         rst_dut <= '0';
         
         -- Wait in IDLE state until trigger is set
-        wait until state = TESTING;
+        --wait until state = TESTING;
         
         -- Open CSV file for reading
+        
         file_open(csv_file, "C:\Users\cmhei\OneDrive\Dokumenter\Semester_7\TFE4141_DDS1\Project\Utilities\tb_utilities\bm_testcase_gen\bm_cases.csv", READ_MODE);
         if not endfile(csv_file) then
             report "File opened successfully." severity note;
@@ -118,9 +121,11 @@ begin
             read(current_line, current_case_expected_R);
             read(current_line, comma); -- Read the next comma separator
             -- Assign to testbench signals
-            A <= current_case_A;
-            B <= current_case_B;
-            N <= "00" & current_case_N; -- Add padding if needed
+            a <= current_case_A;
+            b <= current_case_B;
+            nx1_internal := "00" & current_case_n;
+            nx1 <= nx1_internal;
+            nx2 <= std_logic_vector(unsigned(nx1_internal) sll 1);
             expected_R := current_case_expected_R;
 
             -- Report assigned values for verification

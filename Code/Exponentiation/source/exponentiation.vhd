@@ -22,7 +22,8 @@ entity rsa_core_pipeline is
         IPI : in std_logic;
         IPO : out std_logic;
         ILO : out std_logic;
-        N : in std_logic_vector (c_block_size-1 downto 0);
+        NX1 : in std_logic_vector(c_block_size+1 downto 0);
+        NX2 : in std_logic_vector (c_block_size+1 downto 0);
         E : in std_logic_vector (e_block_size-1 downto 0);
         
         --Data signals
@@ -48,10 +49,6 @@ architecture rtl of rsa_core_pipeline is
     signal dcx_internals : data_internals;
     signal dpx_internals : data_internals;
     
-    --Common values for all stages comupted once here to save luts
-    signal nx1 : std_logic_vector(c_block_size+1 downto 0);
-    signal nx2 : std_logic_vector(c_block_size+1 downto 0);
-    
     type status_internals is array (num_pipeline_stages downto 1) of std_logic_vector(num_status_bits-1 downto 0);
     signal rsm_status_internals : status_internals;
 
@@ -68,9 +65,6 @@ begin
             end if;
         end loop;
     end process gen_status;
-    
-    nx1 <= std_logic_vector("00" & unsigned(N));
-    nx2 <= std_logic_vector(unsigned(nx1) sll 1);
 
     ilx_internals(0) <= ILI;
     IPO <= ipx_internals(0);

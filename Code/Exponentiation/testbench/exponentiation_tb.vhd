@@ -81,8 +81,8 @@ architecture rtl of rsa_tb is
     --Shared modulus and exponent
     signal nx1_rsm : std_logic_vector(c_block_size+1 downto 0);
     signal nx2_rsm : std_logic_vector(c_block_size+1 downto 0);
-    signal nx1_bm : std_logic_vector (c_block_size+1 downto 0);
-    signal nx2_bm : std_logic_vector (c_block_size+1 downto 0);
+    signal nx1_bm : std_logic_vector(c_block_size+1 downto 0);
+    signal nx2_bm : std_logic_vector(c_block_size+1 downto 0);
     signal e : std_logic_vector (c_block_size-1 downto 0);
     
     
@@ -127,10 +127,10 @@ begin
     generic map(
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
-        num_pipeline_stages => num_pipeline_stages,
-        e_block_size => e_block_size,
-        es_size => es_size,
-        log2_es_size => log2_es_size,
+        num_pipeline_stages => 1,
+        e_block_size => 256,
+        es_size => 256,
+        log2_es_size => 9,
         num_status_bits => num_status_bits
     )
     port map(
@@ -188,7 +188,8 @@ begin
     --Standalone test component to test thhe blakeley_module
     BM_TESTER : entity work.bm_tester
     generic map(
-        c_block_size => c_block_size
+        c_block_size => c_block_size,
+        clk_period => clk_period
     )
     port map (
         bm_tester_start => bm_tester_start,

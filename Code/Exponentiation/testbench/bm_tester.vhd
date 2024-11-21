@@ -9,7 +9,8 @@ use work.blakeley_utils.all;
 
 entity bm_tester is
     generic (
-        c_block_size : integer := 256
+        c_block_size : integer := 256;
+        clk_period : time
     );
     port (
         bm_tester_start : in  std_logic;
@@ -52,36 +53,6 @@ architecture rtl of bm_tester is
         return result;
     end function;
 begin    
-    -- FSM Process for state transitions
-    fsm_process: process(clk, rst_tester)
-    begin
-        if rst_tester = '1' then
-            state <= IDLE;
-        elsif rising_edge(clk) then
-            state <= next_state;
-        end if;
-    end process fsm_process;
-
-    -- Process to determine next state
-    next_state_logic: process(state, bm_tester_start)
-    begin
-        case state is
-            when IDLE =>
-                if bm_tester_start = '1' then
-                    next_state <= TESTING;
-                else
-                    next_state <= IDLE;
-                end if;
-            
-            when TESTING =>
-                if bm_tester_start = '0' then
-                    next_state <= IDLE;
-                else
-                    next_state <= TESTING;
-                end if;
-        end case;
-    end process next_state_logic;
-
     stimulus: process
         variable current_line : line;
         variable current_case_A, current_case_B, current_case_N, current_case_expected_R : std_logic_vector(c_block_size-1 downto 0);
@@ -93,12 +64,13 @@ begin
         variable nx1_internal : std_logic_vector(c_block_size+1 downto 0);
     begin
         -- Apply reset
-        rst_dut <= '1';
-        wait for 10 ns;
-        rst_dut <= '0';
+        bm_tester_finished <= '0';
+        --rst_dut <= '1';
+        --wait for 10 ns;
+        --rst_dut <= '0';
         
-        -- Wait in IDLE state until trigger is set
-        --wait until state = TESTING;
+
+        wait until bm_tester_start = '1';
         
         -- Open CSV file for reading
         
@@ -137,6 +109,7 @@ begin
             -- Start the operation
             abval <= '1';
             wait until RVAL = '1';
+            wait for 2*clk_period;
             if(r = expected_R) then
                 pass_count := pass_count + 1;
                 report("Test case " & integer'image(test_case_index) & " passed") severity note;
@@ -146,6 +119,7 @@ begin
             end if;
             test_case_index := test_case_index + 1;
             ABVAL <= '0';
+            wait for 2*clk_period;
         end loop;
         file_close(csv_file);
         report "Test completed. " & integer'image(pass_count) & " cases passed, " & integer'image(fail_count) & " cases failed." severity note;

@@ -22,7 +22,8 @@ entity blakeley_module_control is
            clk : in std_logic;
            rst : in std_logic;
 
-           n : in std_logic_vector (c_block_size+1 downto 0);
+           nx1 : in std_logic_vector (c_block_size+1 downto 0);
+           nx2 : in std_logic_vector (c_block_size+1 downto 0);
            abval : in std_logic;
            rval : out std_logic;
            
@@ -42,7 +43,7 @@ architecture rtl of blakeley_module_control is
     signal control_state : c_state := IDLE; 
     signal control_state_nxt : c_state;
 begin    
-    fsm_comb : process(control_state,abval,ainc_out,sum_out,n) is
+    fsm_comb : process(control_state,abval,ainc_out,sum_out,nx1,nx2) is
         variable ainc_limit : unsigned(log2_c_block_size-1 downto 0);
     begin
         ainc_limit := (others => '1');
@@ -83,9 +84,9 @@ begin
                 ainc_clk_en <= '1';
                 add_out_clk_en <= '1';
                 
-                if (unsigned(sum_out) < unsigned(n)) then
+                if (unsigned(sum_out) < unsigned(nx1)) then
                     mux_ctl <= to_unsigned(0, 2);
-                elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= unsigned(nx1) and unsigned(sum_out) < unsigned(nx2)) then
                     mux_ctl <= to_unsigned(1, 2);
                 else
                     mux_ctl <= to_unsigned(2, 2);
@@ -112,9 +113,9 @@ begin
                 add_out_clk_en <= '0';
                 ainc_clk_en <= '0';
                 
-                if (unsigned(sum_out) < unsigned(n)) then
+                if (unsigned(sum_out) < unsigned(nx1)) then
                     mux_ctl <= to_unsigned(0, 2);
-                elsif (unsigned(sum_out) >= unsigned(n) and unsigned(sum_out) < (unsigned(n) sll 1)) then
+                elsif (unsigned(sum_out) >= unsigned(nx1) and unsigned(sum_out) < unsigned(nx2)) then
                     mux_ctl <= to_unsigned(1, 2);
                 else
                     mux_ctl <= to_unsigned(2, 2);

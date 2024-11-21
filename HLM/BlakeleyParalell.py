@@ -2,9 +2,11 @@ import threading
 import time
 import csv
 import queue
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
-NUM_PIPELINE_STAGES = 8 #Set dependent of PPA in final implementation
-KEY_LENGTH = 64 #Should be 256 in final implemntation
+NUM_PIPELINE_STAGES = 16 #Set dependent of PPA in final implementation
+KEY_LENGTH = 256 #Should be 256 in final implemntation
 
 E = 8954    ## Encryption key
 N = 25553    ## Modulus
@@ -83,27 +85,55 @@ def reportResults():
     else:
         print("\nThere were mismatches in the results.")
 
-def reportProgress():
-    # Prepare a dictionary to store data for each messageID
-    progression = {}
-    
-    for stageID, messageID, currentC, currentP in pipelineLog:
-        if messageID not in progression:
-            progression[messageID] = [''] * (NUM_PIPELINE_STAGES + 1) 
-        progression[messageID][stageID] = f"C: {currentC}, P: {currentP}" 
-    
-    # Print the header
-    print("\n--- Pipeline Progression ---")
-    header = "Message ID | " + " ".join(f"Stage {i if i else ' ':<14}" for i in range(NUM_PIPELINE_STAGES + 1))
-    print(header)
-    print("-" * len(header))
 
-    # Print each messageID's progression
-    for messageID in sorted(progression.keys()):
-        row = f"{messageID:<11} | " + " | ".join(f"{value if value else ' ':<18}" for value in progression[messageID])
-        print(row)
+def generateGanttChart():
+    # Organize data from pipelineLog
+    stages_by_message = {}
+    for stageID, messageID, currentC, currentP, timestamp in pipelineLog:
+        if messageID not in stages_by_message:
+            stages_by_message[messageID] = []
+        stages_by_message[messageID].append((stageID, timestamp))
     
-    print("-" * len(header))
+    # Normalize timestamps
+    start_time = min(entry[4] for entry in pipelineLog)
+    for messageID in stages_by_message:
+        stages_by_message[messageID] = [(stage, t - start_time) for stage, t in stages_by_message[messageID]]
+    
+    # Plot the Gantt chart
+    fig, ax = plt.subplots(figsize=(10, len(stages_by_message) * 0.5))
+    colors = plt.cm.tab20.colors  # Color palette
+
+    for i, (messageID, stages) in enumerate(sorted(stages_by_message.items())):
+        for stage, timestamp in stages:
+            ax.barh(
+                y=i, 
+                width=0.9,  # Block size
+                left=timestamp, 
+                height=0.4, 
+                color=colors[stage % len(colors)], 
+                edgecolor="black",
+                alpha=0.5,  # Partially transparent
+                label=f"Stage {stage}" if stage == 0 else ""
+            )
+
+    # Add grid lines
+    ax.grid(axis='x', linestyle='--', alpha=0.6)
+
+    # Labeling
+    ax.set_yticks(range(len(stages_by_message)))
+    ax.set_yticklabels(sorted(stages_by_message.keys()))
+    ax.set_xlabel("Time (normalized)")
+    ax.set_ylabel("Message ID")
+    ax.set_title("Pipeline Progression")
+
+    # Ensure unique legend entries
+    handles, labels = ax.get_legend_handles_labels()
+    unique_labels = dict(zip(labels, handles))
+    ax.legend(unique_labels.values(), unique_labels.keys(), loc="upper left", bbox_to_anchor=(1.05, 1), title="Stages")
+    
+    plt.tight_layout()
+    plt.show()
+
 
 
 def getQueueElement(q):
@@ -168,7 +198,7 @@ def rsa_stage_module(eSlice,n,stageID):
         intermediatesPopped[stageID-1].release()
 
         pipelineLogMtx.acquire()
-        pipelineLog.append([stageID,currentID, currentC, currentP])
+        pipelineLog.append([stageID, currentID, currentC, currentP, time.time()])
         pipelineLogMtx.release()
 
         ## Accumulate new values
@@ -228,8 +258,9 @@ def rsa_core_control():
         if cases.qsize() == 0:
             print("Finished, no more cases left. Awaiting signal from last pipeline stage.\n")
             pipelineFinished.acquire()
+            print("Generating Gantt Chart...")
+            generateGanttChart()
             print(f"Results of operation: C = M {hex(E)} mod {hex(N)} (E and N in hex)\n")
-            reportProgress()
             reportResults()
             ## Timing test does not make sence in software, as the gains from the pipelining is only existent in HW
         caseMtx.release()

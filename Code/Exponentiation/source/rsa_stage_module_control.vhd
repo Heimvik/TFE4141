@@ -6,6 +6,8 @@ entity rsa_stage_module_control is
     generic(
         c_block_size : integer;
         log2_c_block_size : integer;
+        e_block_size : integer;
+        es_size : integer;
         log2_es_size : integer;
         
         num_pipeline_stages : integer;
@@ -35,7 +37,7 @@ entity rsa_stage_module_control is
         rst : in std_logic;
 
         --Data signals
-        es : in std_logic_vector ((c_block_size/num_pipeline_stages)-1 downto 0);
+        es : in std_logic_vector (es_size-1 downto 0);
         
         --Control signals
         ili : in std_logic;
@@ -78,8 +80,6 @@ architecture rtl of rsa_stage_module_control is
     
     signal es_index : unsigned(log2_es_size-1 downto 0) := to_unsigned(0,log2_es_size);
     signal es_index_nxt : unsigned(log2_es_size-1 downto 0) := to_unsigned(0,log2_es_size);
-    
-    constant es_size : integer := c_block_size/num_pipeline_stages;
 
 begin
     ilo <= ilo_internal;
@@ -229,9 +229,11 @@ begin
                         
                         if c_bm_rval = '0' and p_bm_rval = '0' then
                             blakeley_module_state_nxt <= RUN_CP;
-                            if es_index = to_unsigned(0,log2_es_size) then
+                            if es_index = to_unsigned(es_size,log2_es_size) then
+                                es_index_nxt <= to_unsigned(0,log2_es_size);
                                 stage_state_nxt <= HOLD_OUT;
                             else
+                                es_index_nxt <= es_index;
                                 stage_state_nxt <= RUN_BM;
                             end if;
                         else

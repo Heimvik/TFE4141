@@ -8,7 +8,9 @@ entity rsa_core_pipeline is
 		c_block_size          : integer;
 		log2_c_block_size     : integer;
         num_pipeline_stages   : integer;
-		log2_es_size          : integer;
+        e_block_size          : integer;
+        es_size               : integer;
+        log2_es_size          : integer;
 		num_status_bits       : integer
 	);
     port (
@@ -21,7 +23,7 @@ entity rsa_core_pipeline is
         IPO : out std_logic;
         ILO : out std_logic;
         N : in std_logic_vector (c_block_size-1 downto 0);
-        E : in std_logic_vector (c_block_size-1 downto 0);
+        E : in std_logic_vector (e_block_size-1 downto 0);
         
         --Data signals
         DPO : out std_logic_vector (c_block_size-1 downto 0);
@@ -31,6 +33,7 @@ entity rsa_core_pipeline is
         
         --Status registers
         rsm_status : out std_logic_vector(num_status_bits-1 downto 0)
+         
     );
 end rsa_core_pipeline;
 
@@ -45,22 +48,29 @@ architecture rtl of rsa_core_pipeline is
     signal dcx_internals : data_internals;
     signal dpx_internals : data_internals;
     
+    --Common values for all stages comupted once here to save luts
+    signal nx1 : std_logic_vector(c_block_size+1 downto 0);
+    signal nx2 : std_logic_vector(c_block_size+1 downto 0);
+    
     type status_internals is array (num_pipeline_stages downto 1) of std_logic_vector(num_status_bits-1 downto 0);
     signal rsm_status_internals : status_internals;
-    
-    constant es_size : integer := c_block_size/num_pipeline_stages;
 
 begin
-
+    
     gen_status : process(rsm_status_internals)
     begin
-        for i in 1 to num_pipeline_stages loop
+        for i in 0 to 15 loop
             --Bit 7 in rsm_status_internals is an indication on whether the rsa_stage_module is in state RUN_BM
-            rsm_status(i-1) <= rsm_status_internals(i)(7);
-            --Bit 10 in rsm_status_internals is an indication on whether the blakeley_module is in state RUN_CP
-            rsm_status(num_pipeline_stages+(i-1)) <= not rsm_status_internals(i)(10);
+            if(i<num_pipeline_stages) then
+                rsm_status(i) <= rsm_status_internals(i+1)(7);
+            else
+                rsm_status(i) <= '0';
+            end if;
         end loop;
     end process gen_status;
+    
+    nx1 <= std_logic_vector("00" & unsigned(N));
+    nx2 <= std_logic_vector(unsigned(nx1) sll 1);
 
     ilx_internals(0) <= ILI;
     IPO <= ipx_internals(0);
@@ -74,6 +84,8 @@ begin
             c_block_size => c_block_size,
             log2_c_block_size => log2_c_block_size,
             num_pipeline_stages => num_pipeline_stages,
+            e_block_size => e_block_size,
+            es_size => es_size,
             log2_es_size => log2_es_size,
             num_status_bits => num_status_bits
         )
@@ -85,7 +97,8 @@ begin
             ILO => ilx_internals(i),
             IPI => ipx_internals(i),
             
-            N => n,
+            NX1 => nx1,
+            NX2 => nx2,
             ES => e((es_size*i)-1 downto (es_size*(i-1))),
             DCI => dcx_internals(i-1),
             DPI => dpx_internals(i-1),

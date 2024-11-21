@@ -34,7 +34,8 @@ entity blakeley_module_datapath is
            --Data signals
            a : in std_logic_vector (c_block_size-1 downto 0);
            b : in std_logic_vector (c_block_size-1 downto 0);
-           n : in std_logic_vector (c_block_size+1 downto 0); --NB: To avoid overflow
+           nx1 : in std_logic_vector (c_block_size+1 downto 0);
+           nx2 : in std_logic_vector (c_block_size+1 downto 0);
            r : out std_logic_vector (c_block_size-1 downto 0);
            
            --Control signals
@@ -67,8 +68,6 @@ architecture rtl of blakeley_module_datapath is
     
     signal subtrahend : unsigned(c_block_size+1 downto 0) := to_unsigned(0,c_block_size+2);
 begin
-    -- Debug lines
-    
     -- Datapath combinatorials
     ainc_nxt <= ainc + to_unsigned(1,log2_c_block_size);
     sum_out <= std_logic_vector(add_out);
@@ -91,15 +90,15 @@ begin
     add_out_nxt <= resize(mul_out,add_out_nxt'length) + shift_out;
     
     --Start experimental sub
-    sel_sub_comb : process(mux_ctl,n) is
+    sel_sub_comb : process(mux_ctl,nx1,nx2) is
     begin
         case(to_integer(mux_ctl)) is
             when 0 =>
                 subtrahend <= to_unsigned(0,c_block_size+2);
             when 1 =>
-                subtrahend <= unsigned(n);
+                subtrahend <= unsigned(nx1);
             when others =>
-                subtrahend <= unsigned(n) sll 1;
+                subtrahend <= unsigned(nx2);
         end case;
     end process sel_sub_comb;
 

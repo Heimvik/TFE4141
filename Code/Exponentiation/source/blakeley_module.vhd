@@ -23,7 +23,8 @@ entity blakeley_module is
             
            A : in std_logic_vector (c_block_size-1 downto 0);
            B : in std_logic_vector (c_block_size-1 downto 0);
-           N : in std_logic_vector (c_block_size+1 downto 0); --NB: To avoid overflow
+           NX1 : in std_logic_vector (c_block_size+1 downto 0);
+           NX2 : in std_logic_vector (c_block_size+1 downto 0);
            ABVAL : in std_logic;
            R : out std_logic_vector (c_block_size-1 downto 0);
            RVAL : out std_logic
@@ -54,7 +55,8 @@ begin
             
             a => A,
             b => B,
-            n => N,
+            nx1 => nx1,
+            nx2 => nx2,
             r => R,
             
             ainc_clk_en => ainc_clk_en,
@@ -79,7 +81,8 @@ begin
             clk => clk,
             rst => rst,
             
-            n => N,
+            nx1 => nx1,
+            nx2 => nx2,
             abval => ABVAL,
             rval => RVAL,
             

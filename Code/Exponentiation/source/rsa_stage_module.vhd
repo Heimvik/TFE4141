@@ -7,7 +7,9 @@ entity rsa_stage_module is
 		c_block_size          : integer;
 		log2_c_block_size     : integer;
 		
-		num_pipeline_stages     : integer;
+		num_pipeline_stages   : integer;
+		e_block_size          : integer;
+		es_size               : integer;
         log2_es_size          : integer;
 		
 		num_status_bits       : integer
@@ -21,8 +23,9 @@ entity rsa_stage_module is
         IPI : in std_logic;
         IPO : out std_logic;
         ILO : out std_logic;
-        N : in std_logic_vector (c_block_size-1 downto 0);
-        ES : in std_logic_vector ((c_block_size/num_pipeline_stages)-1 downto 0);
+        NX1 : in std_logic_vector(c_block_size+1 downto 0);
+        NX2 : in std_logic_vector (c_block_size+1 downto 0);
+        ES : in std_logic_vector (es_size-1 downto 0);
         
         --Data signals
         DPO : out std_logic_vector (c_block_size-1 downto 0);
@@ -57,7 +60,6 @@ architecture rtl of rsa_stage_module is
     signal control_status : std_logic_vector(num_status_bits-1 downto 0);
 
 begin
-    n_extended <= "00" & N;
     rsm_status <= control_status;
     
     datapath: entity work.rsa_stage_module_datapath
@@ -68,7 +70,8 @@ begin
         port map(
             clk => CLK,
             
-            n => n_extended,
+            nx1 => nx1,
+            nx2 => nx2,
             dco => DCO,
             dpo => DPO,
             dci => DCI,
@@ -95,6 +98,8 @@ begin
             c_block_size => c_block_size,
             log2_c_block_size => log2_c_block_size,
             num_pipeline_stages => num_pipeline_stages,
+            e_block_size => e_block_size,
+            es_size => es_size,
             log2_es_size => log2_es_size,
             num_status_bits => num_status_bits
         )

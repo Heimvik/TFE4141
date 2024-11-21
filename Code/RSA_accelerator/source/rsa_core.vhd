@@ -23,9 +23,11 @@ entity rsa_core is
 	generic (
         c_block_size : integer  := 256;
         
-        --To change the number of cores, change BOTH:
-        num_pipeline_stages : integer := 1;
-        log2_es_size : integer :=8;        --HAS to be the result of log2(c_block_size/num_pipeline_stages)
+        --To change the number of cores, change ALL four below:
+        num_pipeline_stages : integer := 16;
+        e_block_size : integer := 256;         --es_size*num_pipeline_stages     
+        es_size : integer := 16;
+        log2_es_size : integer := 4;  
         
         log2_c_block_size : integer := 8;
         log2_max_message_count : integer := 16;
@@ -113,6 +115,8 @@ architecture rtl of rsa_core is
     signal message_counter_target_rd_ptr : integer := 0;
     signal message_counter_target_rd_ptr_nxt : integer := 0;
     
+    signal e_extended : std_logic_vector(e_block_size-1 downto 0);
+    
     --Circular increment to realize the fifo increment of the rd_ptr and wr_ptr
     function circular_increment(ptr : integer; max_value : integer) return integer is
     begin
@@ -124,6 +128,7 @@ architecture rtl of rsa_core is
     end function;
 begin
     rsa_status <= std_logic_vector(num_cycles_last_case) & rsm_status(15 downto 0);
+    e_extended <= std_logic_vector(resize(unsigned(key_e_d),e_extended'length));
     
     --Iterface to AXI input stream
     axi_in : process(ipi,axi_in_state,msgin_last,msgin_valid,message_counter_in,message_counter_target,message_counter_target_wr_ptr) is
@@ -181,6 +186,8 @@ begin
         c_block_size => c_block_size,
         log2_c_block_size => log2_c_block_size,
         num_pipeline_stages => num_pipeline_stages,
+        e_block_size => e_block_size,
+        es_size => es_size,
         log2_es_size => log2_es_size,
         num_status_bits => num_status_bits
     )
@@ -197,7 +204,7 @@ begin
         ILO => ili,
         
         N => key_n,
-        E => key_e_d,
+        E => e_extended,
         
         DPI => msgin_data,
         DCI => std_logic_vector(to_unsigned(1, c_block_size)), --The first c has to be 1, see high level model

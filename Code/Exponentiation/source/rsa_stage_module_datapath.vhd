@@ -24,7 +24,8 @@ entity rsa_stage_module_datapath is
         clk : in std_logic;
 
         --Data signals
-        n : in std_logic_vector (c_block_size+1 downto 0); --NB: To avoid overflow
+        nx1 : in std_logic_vector (c_block_size+1 downto 0);
+        nx2 : in std_logic_vector (c_block_size+1 downto 0);
         dco : out std_logic_vector (c_block_size-1 downto 0);
         dpo : out std_logic_vector (c_block_size-1 downto 0);
         dci : in std_logic_vector (c_block_size-1 downto 0);
@@ -88,7 +89,8 @@ begin
             --Here we are doing modular multiplication with c and p, to get the current c
             A => p,
             B => c,
-            N => n,
+            nx1 => nx1,
+            nx2 => nx2,
             ABVAL => c_bm_abval,
             R => c_bm_out,
             RVAL => c_bm_rval
@@ -119,7 +121,8 @@ begin
             --Here we are doing modular multiplication with p and p, to get the 'weight' of the exponent at the next iteration
             A => p,
             B => p,
-            N => n,
+            nx1 => nx1,
+            nx2 => nx2,
             ABVAL => p_bm_abval,
             R => p_bm_out,
             RVAL => p_bm_rval
